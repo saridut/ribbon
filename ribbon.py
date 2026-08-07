@@ -1,0 +1,674 @@
+#!/usr/bin/env python
+
+import copy
+import math
+import os
+import numpy as np
+from scipy.integrate import ode
+from scipy.interpolate import RectBivariateSpline
+from . import xform
+
+
+class Ribbon(object):
+    """
+    Attributes
+    ----------
+    length : float
+        Length of the ribbon.
+    width : float
+        Width of the ribbon.
+    thickness : float
+        Thickness of the ribbon. If zero, the ribbon is a 2D surface in
+        3-space.
+    dl : float
+        Grid spacing in the length direction.
+    dw : float
+        Grid spacing in the width direction.
+    dt : float
+        Grid spacing in the thickness direction. Ignored if `thickness = 0`.
+    l, m, n : float or callable
+        Curvature along length, width, and thickness directions, respectively.
+        If any of the curvatures is callable, it should be of the form *y = f
+        (x)*, where *x* (float) is the arclength coordinate and *y* (float) is
+        the curvature.
+    u, v, w : 1d ndarray
+        Coordinates of the reference grid along length, width, and thickness
+        directions, respectively.
+    mline : (n,3) ndarray
+        Coordinates of the grid points on the ribbon midline in current
+        configuration.
+    msurf : (m,n,3) ndarray
+        Coordinates of the grid points on the ribbon midsurface in the current
+        configuration.
+    grid : (m,n,p,3) ndarray
+        Coordinates of the grid points of the ribbon in the current configuration.
+    atom_refpos : (n,3) ndarray
+        Atom coordinates in the reference state.
+    atom_pos : (n,3) ndarray
+        Atom coordinates in the current configuration.
+
+    Parameters
+    ----------
+    length : float
+        Length of the ribbon.
+    width : float
+        Width of the ribbon.
+    thickness : float
+        Thickness of the ribbon. If zero, the ribbon is a 2D surface in
+        3-space.
+    dl : float
+        Grid spacing in the length direction.
+    dw : float
+        Grid spacing in the width direction.
+    dt : float
+        Grid spacing in the thickness direction. Ignored if `thickness = 0`.
+    atom_refpos : (n,3) ndarray
+        Atom positions in the reference state.
+
+    """
+    def __init__(self, length, width, thickness, dl, dw, dt, atom_refpos=None):
+        if not ( isinstance(length, np.number) and length > 0 ):
+            raise ValueError( f"`length`(= {length}:g) must be a number > 0.")
+        else:
+            self.length = length
+
+        if not ( isinstance(width, np.number) and length > 0 ):
+            raise ValueError( f"`length`(= {width}:g) must be a number > 0.")
+        else:
+            self.width = width
+
+        if not ( isinstance(thickness, np.number) and length >= 0 ):
+            raise ValueError( f"`length`(= {thickness}:g) must be a number >= 0.")
+        else:
+            self.thickness = thickness
+
+        nu = math.ceil(self.length/dl) + 1
+        if nu < 4:
+            raise ValueError(
+                f"{nu} grid points along the length direction. Must be > 4."
+                " Reduce grid spacing.")
+        self.u = np.linspace(0, self.length, nu, dtype=np.float64)
+
+        nv = math.ceil(self.width/dw) + 1
+        if nv < 4:
+            raise ValueError(
+                f"{nv} grid points along the width direction. Must be > 4."
+                " Reduce grid spacing.")
+        self.v = np.linspace(-self.width/2, self.width/2, nu, dtype=np.float64)
+
+        if self.thickness > 0:
+            nw = math.ceil(self.thickness/dt) + 1
+            if nw < 2:
+                raise ValueError(
+                    f"{nw} grid points along the thickness direction."
+                    " Must be > 2. Reduce grid spacing.")
+            self.w = np.linspace(-self.thickness/2, self.thickness/2, nw,
+                                 dtype=np.float64)
+
+        self.mline = np.zeros((self.u.size, 3))
+        self._d1 = np.zeros_like(self.mline)
+        self._d2 = np.zeros_like(self.mline)
+        self._d3 = np.zeros_like(self.mline)
+        self.msurf = np.zeros((self.u.size, self.v.size, 3))
+        if self.thickness > 0:
+            self.grid = np.zeros((self.u.size, self.v.size, self.w.size, 3))
+            self._msurf_du = np.zeros_like(self.msurf)
+            self._msurf_dv = np.zeros_like(self.msurf)
+            self._normals = np.zeros_like(self.msurf)
+        else:
+            self.grid = np.zeros_like(self.msurf)
+            self._msurf_du = np.zeros((0,0))
+            self._msurf_dv = np.zeros_like(self._msurf_du)
+            self._normals = np.zeros_like(self._msurf_du)
+        if atom_refpos is not None:
+            self.atom_refpos = np.asarray(atom_refpos, dtype=np.float64, copy=True)
+        else:
+            self.atom_refpos = np.zeros((0,0))
+        self.atom_pos = np.zeros_like(self.atom_refpos)
+        self._ap_ms = np.zeros_like(self.atom_pos)
+        self._ap_du = np.zeros_like(self.atom_pos)
+        self._ap_dv = np.zeros_like(self.atom_pos)
+        self._ap_normals = np.zeros_like(self.atom_pos)
+
+    def set_curvatures(self, l, m, n):
+        """
+        Setter for the curvatures along the three directions.
+
+        If any of the curvatures is callable, it should be of the form *y = f
+        (x)*, where *x* (float) is the arclength coordinate and *y* (float) is
+        the curvature.
+
+        Parameters
+        ----------
+        l : float or callable
+            Curvature along the length direction 
+        m : float or callable
+            Curvature along the width direction 
+        n : float or callable
+            Curvature along the thickness direction 
+
+        Returns
+        -------
+        None
+        """
+        if not (isinstance(l, np.number) or callable(l) ):
+            raise ValueError(f"`l`(= {l}) must be a float or callable.")
+        else:
+            self.l = l
+
+        if not (isinstance(m, np.number) or callable(m) ):
+            raise ValueError(f"`m`(= {m}) must be a float or callable.")
+        else:
+            self.m = m
+
+        if not (isinstance(n, np.number) or callable(n) ):
+            raise ValueError(f"`n`(= {n}) must be a float or callable.")
+        else:
+            self.n = n
+
+        if not (callable(self.l) or callable(self.m)):
+            self.meth = 'direct'
+        else:
+            self.meth = 'ode'
+        self.mline[...] = 0.0
+        self._d1[...] = 0.0
+        self._d2[...] = 0.0
+        self._d3[...] = 0.0
+        self.msurf[...] = 0.0
+        self.grid[...] = 0.0
+        self._msurf_du[...] = 0.0
+        self._msurf_dv[...] = 0.0
+        self._normals[...] = 0.0
+        self.atom_pos[...] = 0.0
+        self._ap_ms[...] = 0.0
+        self._ap_du[...] = 0.0
+        self._ap_dv[...] = 0.0
+        self._ap_normals[...] = 0.0
+
+    def get_radius(self):
+        """
+        Returns the radius along the ribbon midline.
+
+        Returns
+        -------
+        float or tuple of 1D ndarrays
+            Radius along the ribbon midline. If all curvatures are constants, a
+            *float* is returned. If any of the curvatures is *callable*, a tuple
+            *(x,y)* is returned, where *x* contains the arclength coordinates of
+            the ribbon midline and *y* contains the corresponding radii.
+        """
+        if not (callable(self.l) or callable(self.m)):
+            if self.l == self.m == 0:
+                R = math.inf
+            else:
+                R = self.l/(self.l**2+self.m**2)
+            return R
+        else:
+            if callable(self.l):
+                l = [self.l(x) for x in self.u]
+            else:
+                l = [self.l for x in self.u]
+            if callable(self.m):
+                m = [self.m(x) for x in self.u]
+            else:
+                m = [self.m for x in self.u]
+            R = [math.inf if x==y==0 else x/(x**2+y**2) for (x,y) in zip(l,m)]
+            return (self.u, np.array(R, dtype=np.float64, copy=None, ndmin=1))
+
+    def get_pitch(self):
+        """
+        Returns the pitch along the ribbon midline.
+
+        Returns
+        -------
+        float or tuple of 1D ndarrays
+            Pitch along the the ribbons midline. If all curvatures are constants, a
+            *float* is returned. If any of the curvatures is *callable*, a tuple
+            *(x,y)* is returned, where *x* contains the arclength coordinates of
+            the ribbon midline and *y* contains the corresponding pitch values.
+        """
+        if not (callable(self.l) or callable(self.m)):
+            if self.l == self.m == 0:
+                P = math.inf
+            else:
+                P = 2*math.pi*self.m/(self.l**2+self.m**2)
+            return P
+        else:
+            if callable(self.l):
+                l = [self.l(x) for x in self.u]
+            else:
+                l = [self.l for x in self.u]
+            if callable(self.m):
+                m = [self.m(x) for x in self.u]
+            else:
+                m = [self.m for x in self.u]
+            P = [math.inf if x==y==0 else 2*math.pi*x/(x**2+y**2)
+                 for (x,y) in zip(l,m)]
+            return (self.u, np.array(P, dtype=np.float64, copy=None, ndmin=1))
+
+
+    def get_gauss_curvature(self):
+        """
+        Returns the gaussian curvature along the ribbon midline.
+
+        Returns
+        -------
+        float or tuple of 1D ndarrays
+            Gaussian curvature along the ribbons midline. If all curvatures are
+            constants, a *float* is returned. If any of the curvatures is
+            *callable*, a tuple *(x,y)* is returned, where *x* contains the
+            arclength coordinates of the ribbon midline and *y* contains the
+            corresponding gaussian curvatures.
+        """
+        if not (callable(self.l) or callable(self.m) or callable(self.n)):
+            kg = self.l*self.n - self.m**2
+            return kg
+        else:
+            if callable(self.l):
+                l = [self.l(x) for x in self.u]
+            else:
+                l = [self.l for x in self.u]
+            if callable(self.m):
+                m = [self.m(x) for x in self.u]
+            else:
+                m = [self.m for x in self.u]
+            if callable(self.n):
+                n = [self.n(x) for x in self.u]
+            else:
+                n = [self.n for x in self.u]
+            kg = [x*z-y**2 for (x,y,z) in zip(l,m,n)]
+            return (self.u, np.asarray(kg))
+
+
+    def get_mean_curvature(self):
+        """
+        Returns the mean curvature along the ribbon midline.
+
+        Returns
+        -------
+        float or tuple of 1D ndarrays
+            Mean curvature along the ribbons midline. If all curvatures are
+            constants, a *float* is returned. If any of the curvatures is
+            *callable*, a tuple *(x,y)* is returned, where *x* contains the
+            arclength coordinates of the ribbon midline and *y* contains the
+            corresponding mean curvatures.
+        """
+        if not (callable(self.l) or callable(self.n)):
+            km = 0.5*(self.l+self.n)
+            return km
+        else:
+            if callable(self.l):
+                l = [self.l(x) for x in self.u]
+            else:
+                l = [self.l for x in self.u]
+            if callable(self.n):
+                n = [self.n(x) for x in self.u]
+            else:
+                n = [self.n for x in self.u]
+            km = [0.5*(x+y) for (x,y) in zip(l,n)]
+            return (self.u, np.asarray(km))
+
+
+    def get_theta(self):
+        """
+        Returns the angle (in radians) between the principal curvature direction
+        and the lengthwise direction along the ribbon midline.
+
+        Returns
+        -------
+        float or tuple of 1D ndarrays
+            Angle (in radians). If all curvatures are constants, a *float* is
+            returned. If any of the curvatures is *callable*, a tuple *(x,y)* is
+            returned, where *x* contains the arclength coordinates of the ribbon
+            midline and *y* contains the corresponding angle.
+        """
+        if not (callable(self.l) or callable(self.m) or callable(self.n)):
+            theta = 0.5*math.atan(2*self.m/(self.l-self.n)) \
+                    if self.l != self.n else math.pi/4
+            return theta
+        else:
+            if callable(self.l):
+                l = [self.l(x) for x in self.u]
+            else:
+                l = [self.l for x in self.u]
+            if callable(self.m):
+                m = [self.m(x) for x in self.u]
+            else:
+                m = [self.m for x in self.u]
+            if callable(self.n):
+                n = [self.n(x) for x in self.u]
+            else:
+                n = [self.n for x in self.u]
+            theta = [0.5*math.atan(2*y/(x-z)) if x!=z else math.pi/4
+                     for (x,y,z) in zip(l,m,n)]
+            return (self.u, np.asarray(theta))
+
+
+    def create(self, orient_along=[1,0,0]):
+        """
+        Constructs the ribbon and orients it along `orient_along`.
+
+        Parameters
+        ----------
+        orient_along : (3,) array_like or None
+            If not ``None`` and the curvatures are constant, the ribbon axis
+            will be oriented along `orient_along`. This does not need to be a
+            unit vector.
+
+        Returns
+        -------
+        None
+
+        """
+        if self.meth == 'direct':
+            if self.l==self.m==0:
+                self._create_direct_zero()
+            else:
+                self._create_direct(orient_along)
+        elif self.meth == 'ode':
+            self._create_ode(orient_along)
+
+
+    def _create_direct_zero(self):
+        #Create the midline
+        for i in range(self.u.size):
+            u = self.u[i]
+            self.mline[i,:] = np.array([0,0,u])
+            self._d1[i,:] = np.array([1,0,0])
+            self._d2[i,:] = np.array([0,1,0])
+            self._d3[i,:] = np.array([0,0,1])
+        self._create_msga()
+
+
+    def _create_direct(self, orient_along):
+        omega = (  self.l, 0, -self.m)
+        omega_mag2 = omega[0]*omega[0] + omega[2]*omega[2]
+        iomega_mag2 = 1/omega_mag2
+        omega_mag = math.sqrt(omega_mag2)
+        iomega_mag = 1/omega_mag
+
+        #Create the midline
+        for i in range(self.u.size):
+            u = self.u[i]
+            sn = math.sin(omega_mag*u)
+            cs = math.cos(omega_mag*u)
+
+            self.mline[i,0] = -omega[0]*omega[2]*iomega_mag2*(u - sn*iomega_mag)
+            self.mline[i,1] = -omega[0]*iomega_mag2*(1 - cs)
+            self.mline[i,2] = omega[2]*omega[2]*iomega_mag2 \
+                    *(u - sn*iomega_mag) + sn*iomega_mag
+
+            self._d1[i,0] =  omega[0]*omega[0]*iomega_mag2*(1-cs) + cs
+            self._d1[i,1] = -omega[2]*iomega_mag*sn
+            self._d1[i,2] = -omega[0]*omega[2]*iomega_mag2*(1-cs)
+
+            self._d2[i,0] = omega[2]*iomega_mag*sn
+            self._d2[i,1] = cs
+            self._d2[i,2] = omega[0]*iomega_mag*sn
+
+            self._d3[i,0] = -omega[0]*omega[2]*iomega_mag2*(1-cs)
+            self._d3[i,1] = -omega[0]*iomega_mag*sn
+            self._d3[i,2] =  omega[2]*omega[2]*iomega_mag2*(1-cs) + cs
+
+            #Alternative formulation for omega[0] = -l
+            #TODO: check for sign consistency. Ideally, omega[0]=l,
+            #omega[2] = m. Check if this may be the case.
+           #self.mline[i,0] = omega[0]*omega[2]*iomega_mag2*(u - sn*iomega_mag)
+           #self.mline[i,1] = omega[0]*iomega_mag2*(1 - cs)
+           #self.mline[i,2] = omega[2]*omega[2]*iomega_mag2 \
+           #        *(u - sn*iomega_mag) + sn*iomega_mag
+
+           #self._d1[i,0] = omega[0]*omega[0]*iomega_mag2*(1-cs) + cs
+           #self._d1[i,1] = -omega[2]*iomega_mag*sn
+           #self._d1[i,2] = omega[0]*omega[2]*iomega_mag2*(1-cs)
+
+           #self._d2[i,0] = omega[2]*iomega_mag*sn
+           #self._d2[i,1] = cs
+           #self._d2[i,2] = -omega[0]*iomega_mag*sn
+
+           #self._d3[i,0] = omega[0]*omega[2]*iomega_mag2*(1-cs)
+           #self._d3[i,1] = omega[0]*iomega_mag*sn
+           #self._d3[i,2] = omega[2]*omega[2]*iomega_mag2*(1-cs) + cs
+        self._create_msga()
+
+        #Determining the axis of the midline helix: First evaluate the helix at
+        #a point one turn away.
+        if orient_along is None:
+            return
+        gamag = math.hypot(*orient_along[0:3])
+        if math.isclose(gamag, 0.0):
+            raise ValueError(f"orient_along = {orient_along} is a zero vector.")
+        else:
+            gaxis = np.asarray(orient_along[0:3], dtype=np.float64,
+                               copy=True)/gamag
+        
+        u = 2*math.pi*iomega_mag
+        p = np.array([
+            omega[0]*omega[2]*iomega_mag2*u,
+            0,
+            omega[2]*omega[2]*iomega_mag2*u
+            ])
+        pmag = np.linalg.vector_norm(p)
+        if math.isclose(pmag, 0.0):
+            axis = np.array([-1,0,0])
+        else:
+            axis = p/pmag
+        self.mline[:,:] = xform.align(self.mline, axis, gaxis)
+        self._d1[:,:] = xform.align(self._d1, axis, gaxis)
+        self._d2[:,:] = xform.align(self._d2, axis, gaxis)
+
+        shp = self.msurf.shape
+        tmp = self.msurf.reshape(shp[0]*shp[1],3)
+        self.msurf[:,:] = xform.align(tmp, axis, gaxis).reshape(shp)
+
+        shp = self.grid.shape
+        tmp = self.grid.reshape(math.prod(shp[0:-1]),3)
+        self.grid[...] = xform.align(tmp, axis, gaxis).reshape(shp)
+
+        if self.atom_refpos.shape[0] > 0:
+            self.atom_pos[:,:] = xform.align(self.atom_pos, axis, gaxis)
+
+    @staticmethod
+    def _rhs(u, y, l, m):
+        ydot = np.zeros_like(y)
+        xform.normalize_quat(y[0:4])
+        omega = [l(u), 0, -m(u)]
+
+        ydot[0] = 0.5*( -omega[0]*y[1] - omega[2]*y[3] )
+        ydot[1] = 0.5*(  omega[0]*y[0] - omega[2]*y[2] )
+        ydot[2] = 0.5*( -omega[2]*y[1] + omega[0]*y[3] )
+        ydot[3] = 0.5*(  omega[2]*y[0] - omega[0]*y[2] )
+
+        ydot[4] = 2*(y[1]*y[3] + y[0]*y[2])
+        ydot[5] = 2*(y[2]*y[3] - y[0]*y[1])
+        ydot[6] = 2*(y[0]*y[0] + y[3]*y[3]) - 1
+        return ydot
+
+    def _create_ode(self, orient_along):
+        def rhs(u, y, l, m):
+            ydot = np.zeros_like(y)
+            xform.normalize_quat(y[0:4])
+            omega = [l(u), 0, -m(u)]
+
+            ydot[0] = 0.5*( -omega[0]*y[1] - omega[2]*y[3] )
+            ydot[1] = 0.5*(  omega[0]*y[0] - omega[2]*y[2] )
+            ydot[2] = 0.5*( -omega[2]*y[1] + omega[0]*y[3] )
+            ydot[3] = 0.5*(  omega[2]*y[0] - omega[0]*y[2] )
+
+            ydot[4] = 2*(y[1]*y[3] + y[0]*y[2])
+            ydot[5] = 2*(y[2]*y[3] - y[0]*y[1])
+            ydot[6] = 2*(y[0]*y[0] + y[3]*y[3]) - 1
+            return ydot
+
+        l = self.l if callable(self.l) else lambda x: self.l
+        m = self.m if callable(self.m) else lambda x: self.m
+
+        y0 = np.array([1,0,0,0,0,0,0], dtype=np.float64)
+
+        solver = ode(rhs)
+        solver.set_integrator('dop853', rtol=1e-8, atol=1e-12, max_step=0.001)
+        solver.set_f_params(l, m)
+        solver.set_initial_value(y0, 0)
+        
+        for i in range(self.u.size):
+            u = self.u[i]
+            y = solver.integrate(u, step=False)
+            if not solver.successful():
+                print('Status = ', solver.get_return_code())
+                raise RuntimeError('ODE solver failed.')
+            xform.normalize_quat(y[0:4])
+            self.mline[i,:] = y[4:]
+            dcm = xform.quat_to_dcm(y[0:4])
+            self._d1[i,:] = dcm[0,:]
+            self._d2[i,:] = dcm[1,:]
+            self._d3[i,:] = dcm[2,:]
+        self._create_msga()
+
+
+    def _create_msga(self):
+        #Create the midsurface
+        if callable(self.n):
+            n = np.broadcast_to( self.n(self.u).reshape(self.u.size,1),
+                                (self.u.size,3) )
+        else:
+            n = np.broadcast_to(self.n,(self.u.size,3))
+
+        for j in range(self.v.size):
+            v = self.v[j]
+            self.msurf[:,j,:] = (self.mline + v*self._d1 
+                                 - 0.5*v*v*n*self._d2)
+
+        rbsX = RectBivariateSpline(self.u, self.v, self.msurf[:,:,0])
+        rbsY = RectBivariateSpline(self.u, self.v, self.msurf[:,:,1])
+        rbsZ = RectBivariateSpline(self.u, self.v, self.msurf[:,:,2])
+
+        #Calculate the current grid
+        if self.thickness == 0:
+            self.grid[...] = self.msurf[...]
+        else:
+            self._msurf_du[:,:,0] = rbsX(self.u, self.v, dx=1, dy=0, grid=True)
+            self._msurf_du[:,:,1] = rbsY(self.u, self.v, dx=1, dy=0, grid=True)
+            self._msurf_du[:,:,2] = rbsZ(self.u, self.v, dx=1, dy=0, grid=True)
+
+            self._msurf_dv[:,:,0] = rbsX(self.u, self.v, dx=0, dy=1, grid=True)
+            self._msurf_dv[:,:,1] = rbsY(self.u, self.v, dx=0, dy=1, grid=True)
+            self._msurf_dv[:,:,2] = rbsZ(self.u, self.v, dx=0, dy=1, grid=True)
+
+            self._normals[:,:,:] = np.cross(self._msurf_du, self._msurf_dv, axis=2)
+            norm = np.linalg.vector_norm(self._normals, axis=2, keepdims=True)
+            self._normals /= norm
+
+            for k in range(self.w.size):
+                w = self.w[k]
+                self.grid[:,:,k,:] = self.msurf + w*self._normals
+
+        #Atom positions
+        if self.atom_refpos.shape[0] > 0:
+            self._ap_ms[:,0] = rbsX(self.atom_refpos[:,0], 
+                                    self.atom_refpos[:,1], grid=False)
+            self._ap_ms[:,1] = rbsY(self.atom_refpos[:,0], 
+                                    self.atom_refpos[:,1], grid=False)
+            self._ap_ms[:,2] = rbsZ(self.atom_refpos[:,0], 
+                                    self.atom_refpos[:,1], grid=False)
+
+            if self.thickness == 0:
+                self.atom_pos[:,:] = self._ap_ms[:,:]
+            else:
+                self._ap_du[:,0] = rbsX(self.atom_refpos[:,0],
+                                        self.atom_refpos[:,1], dx=1, dy=0,
+                                        grid=False)
+                self._ap_du[:,1] = rbsY(self.atom_refpos[:,0],
+                                        self.atom_refpos[:,1], dx=1, dy=0,
+                                        grid=False)
+                self._ap_du[:,2] = rbsZ(self.atom_refpos[:,0],
+                                        self.atom_refpos[:,1], dx=1, dy=0,
+                                        grid=False)
+
+                self._ap_dv[:,0] = rbsX(self.atom_refpos[:,0],
+                                        self.atom_refpos[:,1], dx=0, dy=1,
+                                        grid=False)
+                self._ap_dv[:,1] = rbsY(self.atom_refpos[:,0], 
+                                        self.atom_refpos[:,1], dx=0, dy=1,
+                                        grid=False)
+                self._ap_dv[:,2] = rbsZ(self.atom_refpos[:,0],
+                                        self.atom_refpos[:,1], dx=0, dy=1,
+                                        grid=False)
+
+                self._ap_normals[:,:] = np.cross(self._ap_du, self._ap_dv, axis=1)
+                norm = np.linalg.vector_norm(self._ap_normals, axis=1, keepdims=True)
+                self._ap_normals /= norm
+                tmp = np.einsum('ij,i->ij',self._ap_normals, self.atom_refpos[:,2])
+                self.atom_pos[:,:] = self._ap_ms + tmp
+
+
+if __name__ == '__main__':
+
+    length = 20
+    width = 2
+    thickness = 0.0
+    l = 0.4
+    #l = lambda x: 0.5 *(1-x/length)
+    #l = lambda x: 0.2 *(x**0.4)
+    m = 0.4 #lambda x: 0.5 #*(1-x/length) #+ve right handed, -ve left handed
+    n = 0.4 #lambda x: 0.5*np.cos(x) #0.5
+    #n = lambda x: 0.5*(1-x/length)
+    
+#   atom_coords = []
+#   for x in np.arange(0, length+0.025, 0.4):
+#       for y in np.arange(-width/2, 0.025+width/2, 0.4):
+#           for z in np.arange(-thickness/2, 0.025+thickness/2, 0.3):
+#               atom_coords.append([x,y,z])
+
+    #ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.08, np.asarray(atom_coords))
+    ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.08)
+    ribbon.set_curvatures(l, m, n)
+    #out = ribbon.get_radius()
+    #if isinstance(out, tuple):
+    #    for x,y in zip(out[0],out[1]):
+    #        print(f"{x:g}  {y:g}") 
+    #else:
+    #    print(f"R = {out}")
+    #print(f"R = {ribbon.get_radius()}\n"
+    #      f"P = {ribbon.get_pitch()}\n"
+    #      f"kg = {ribbon.get_gauss_curvature()}\n"
+    #      f"km = {ribbon.get_mean_curvature()}\n"
+    #      f"theta = {ribbon.get_theta()}")
+    #raise SystemExit()
+    ribbon.create(orient_along=[0,0,1])
+
+
+    figh, axh = plt.subplots(nrows=1, ncols=1 ,
+            subplot_kw={'projection':'3d', 'proj_type': 'ortho'},
+                             figsize=(12,9))
+
+    axh.plot(ribbon.mline[:,0], ribbon.mline[:,1], ribbon.mline[:,2], '-k', lw=1.2)
+    axh.plot(ribbon.mline[0,0], ribbon.mline[0,1], ribbon.mline[0,2], 'or')
+
+    #axh.plot_surface(ribbon.msurf[:,:,0], ribbon.msurf[:,:,1],
+    #            ribbon.msurf[:,:,2], facecolor='r', edgecolor='0.6', lw=0.7, alpha=0.4,
+    #            rstride=4, cstride=8)
+
+    axh.plot_wireframe(ribbon.msurf[:,:,0], ribbon.msurf[:,:,1],
+                ribbon.msurf[:,:,2], linestyles='-', linewidths=0.5,
+                rstride=2, cstride=8, color='0.5')
+    
+    frl = np.linspace(0,ribbon.u.size-1,10, dtype=np.int32)
+    axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
+               ribbon._d1[frl,0], ribbon._d1[frl,1], ribbon._d1[frl,2],
+               length=1.2, color='r')
+    axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
+               ribbon._d2[frl,0], ribbon._d2[frl,1], ribbon._d2[frl,2],
+               length=1.2, color='g')
+    axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
+               ribbon._d3[frl,0], ribbon._d3[frl,1], ribbon._d3[frl,2],
+               length=1.2, color='b')
+
+    axh.set_aspect('equal', 'box')
+    #axh.set_xlabel('x')
+    #axh.set_ylabel('y')
+    #axh.set_zlabel('z')
+    #axh.set_xticks(axh.get_xlim())
+    #axh.set_yticks([])
+    #axh.set_zticks([])
+    axh.set_axis_off()
+    plt.show()
