@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+__version__ = "0.5.0"
 
 from .spiralpolar import SpiralCircleInvolute
 from .spiralarchimedes import (SpiralArchimedesGeneral, 

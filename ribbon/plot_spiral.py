@@ -6,7 +6,7 @@ import matplotlib as mpl
 import matplotlib.ticker as ticr
 from scipy.special import fresnel
 from scipy.integrate import romb
-from spirals import *
+from spirals import SpiralFermat
 
 
 #######################################################################
@@ -124,7 +124,6 @@ mpl.rc('ps',     **ps_prop   )
 #######################################################################
 mpl.use('PDF')
 import matplotlib.pyplot as plt
-
 
 #Plotting
 figh, axh = plt.subplots(nrows=1, ncols=1)
