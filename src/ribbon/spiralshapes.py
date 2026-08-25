@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Functions to construct shapes based on plane spirals.
 

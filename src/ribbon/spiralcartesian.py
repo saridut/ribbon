@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Classes for spirals described by a Césaro equation :math:`\\kappa = f(s)`, where
 :math:`\\kappa` is the curvature and :math:`s` is the arclength.
@@ -64,7 +63,7 @@ class SpiralCartesianBase(ABC):
         -------
         x, y : tuple
             Cartesian coordinates. If `s` is a scalar, `x` and `y` are floats,
-            else they are 1D *ndarray*.
+            else they are 1D *ndarray*\ .
 
         """
         pass

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Classes for spirals described by a polar equation *r = f(theta)*.
 
@@ -19,7 +18,7 @@ class SpiralPolarBase(ABC):
     Attributes
     ----------
     tincr : bool
-        Whether radius increases with increasing *theta*.
+        Whether radius increases with increasing *theta*\ .
     r0, t0 : float
         The spiral curve segment begins at (*r* = `r0`, *theta* = `t0`).
 
@@ -363,7 +362,7 @@ class SpiralPolarBase(ABC):
         -------
         x, y : tuple
             Cartesian coordinates. If `v` is a scalar, `x` and `y` are floats,
-            else they are 1D *ndarray*s.
+            else they are 1D *ndarray*\ s.
 
         """
         r, theta = self.get_polar_coords(v, var)
@@ -388,7 +387,7 @@ class SpiralPolarBase(ABC):
         -------
         r, theta : tuple
             Polar coordinates. If `v` is a scalar, `r` and `theta` are 
-            floats, else they are 1D *ndarray*s.
+            floats, else they are 1D *ndarray*\ s.
 
         """
         if var not in ['r', 'theta', 's']:

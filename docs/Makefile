@@ -1,20 +1,29 @@
-# Minimal makefile for Sphinx documentation
-#
+# Makefile for Sphinx documentation
 
-# You can set these variables from the command line, and also
-# from the environment for the first two.
-SPHINXOPTS    ?=
-SPHINXBUILD   ?= sphinx-build
-SOURCEDIR     = source
-BUILDDIR      = build
+SHELL = /bin/bash
 
-# Put it first so that "make" without argument is like "make help".
-help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+PACKAGE_NAME = ribbon
+MODULE_PATH = ../src/$(PACKAGE_NAME)
+RST_SOURCE_DIR  = $(CURDIR)/source
+BUILD_DIR = $(CURDIR)/build
 
-.PHONY: help Makefile
+apidoc: export SPHINX_APIDOC_OPTIONS = members,inherited-members,show-inheritance
+#available options = members,undoc-members,inherited-members,show-inheritance
 
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+.PHONY: doc
+doc:
+	sphinx-build -b html "$(RST_SOURCE_DIR)" "$(BUILD_DIR)"/html
+
+.PHONY: rst   
+rst:
+	sphinx-apidoc -M -e -f -d 2 -o "$(RST_SOURCE_DIR)" "$(MODULE_PATH)"
+
+.PHONY: clean
+clean :
+	rm -rf "$(BUILD_DIR)"/*
+
+.PHONY: clobber
+clobber :
+	rm -rf "$(RST_SOURCE_DIR)"/$(PACKAGE_NAME)*.rst \
+		"$(RST_SOURCE_DIR)"/modules.rst 	\
+		"$(BUILD_DIR)"/*

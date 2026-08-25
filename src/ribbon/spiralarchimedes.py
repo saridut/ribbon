@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Classes for spirals described by the polar equation *r = b * theta^n*.
 
