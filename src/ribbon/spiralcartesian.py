@@ -63,7 +63,7 @@ class SpiralCartesianBase(ABC):
         -------
         x, y : tuple
             Cartesian coordinates. If `s` is a scalar, `x` and `y` are floats,
-            else they are 1D *ndarray*\ .
+            else they are 1D *ndarray*.
 
         """
         pass
@@ -103,17 +103,15 @@ class SpiralPolynomial(SpiralCartesianBase):
     Polynomials with degree greater than 2 often result in self-intersecting, or
     at least self-touching spirals.
 
+    Parameters
+    ----------
+    coeffs : array_like
+        Coefficients of the polynomial in order of ascending power, i.e.
+        `coeffs[i]` is the coefficient of *s^i*.
+
     """
     def __init__(self, coeffs):
-        """
-        Parameters
-        ----------
-        coeffs : array_like
-            Coefficients of the polynomial in order of ascending power, i.e.
-            `coeffs[i]` is the coefficient of *s^i*.
-
-        """
-        if np.all(coeffs == 0):
+        if np.allclose(coeffs, 0.0, rtol=1e-8, atol=1e-14):
             raise ValueError(f"`coeffs`(= {coeffs}) must not all be zero.")
         self._func_kappa = Polynomial(coeffs)
         self._func_int_kappa = self._func_kappa.integ(m=1)
@@ -159,16 +157,14 @@ class SpiralCornu(SpiralCartesianBase):
     """
     The Césaro equation is :math:`\\kappa = as`, where :math:`a > 0`.
 
+    Parameters
+    ----------
+    a : float
+        Proportionality constant between curvature and arclength. Must be >
+        0.
+
     """
     def __init__(self, a): 
-        """
-        Parameters
-        ----------
-        a : float
-            Proportionality constant between curvature and arclength. Must be >
-            0.
-
-        """
         if a <= 0.0:
             raise ValueError(f"`a` must be >= 0. a = {a}.")
         self.a = a
@@ -201,21 +197,18 @@ class SpiralCornu(SpiralCartesianBase):
 
 class SpiralNielsen(SpiralCartesianBase):
     '''
-
     The Césaro equation is :math:`\\kappa = a e^{bs}`, where
     :math:`a > 0, b \\neq 0`.
 
+    Parameters
+    ----------
+    a : float
+        Parameter in the Césaro equation. Must be > 0.
+    b : float
+        Parameter in the Césaro equation. Must be non-zero.
+
     '''
     def __init__(self, a, b):
-        """
-        Parameters
-        ----------
-        a : float
-            Parameter in the Césaro equation. Must be > 0.
-        b : float
-            Parameter in the Césaro equation. Must be non-zero.
-
-        """
         if a <= 0.0:
             raise ValueError(f"`a` must be >= 0. a = {a}.")
         if b == 0.0:

@@ -18,7 +18,7 @@ class SpiralPolarBase(ABC):
     Attributes
     ----------
     tincr : bool
-        Whether radius increases with increasing *theta*\ .
+        Whether radius increases with increasing *theta*.
     r0, t0 : float
         The spiral curve segment begins at (*r* = `r0`, *theta* = `t0`).
 
@@ -184,24 +184,43 @@ class SpiralPolarBase(ABC):
             If any input is out-of-range.
 
         """
+        eps = np.finfo(np.float64).eps
         if var not in ['r', 'theta', 's']:
             raise ValueError(f"var(= {var}) must be either 'r', 'theta', or 's'.")
         v_ = np.array(v, dtype=np.float64, copy=None, ndmin=1)
         if var == 's':
-            if np.any(v_ < 0.0):
-                raise ValueError(f"Arclengths must be >= 0.\n"
-                                 f" Arclengths:\n{v}.")
+            is_less_than = v_ < 0.0
+            if np.any(is_less_than):
+                i = np.nonzero(is_less_than)[0][0]
+                raise ValueError(f"Arclengths must be >= 0."
+                                 f" v[{i}] = {v[i]:g}.")
         if var == 'r':
-            if np.any(v_ < self.r0):
-                raise ValueError(f"Radii must be >= `self.r0`(= {self.r0:g}).\n"
-                                 f"Radii:\n{v}.")
+            is_close = np.isclose(v_, self.r0, rtol=1e-8, atol=1e-15)
+            is_not_close = np.logical_not( is_close )
+            is_less_than = np.logical_and(is_not_close, (v_ < self.r0) )
+            if np.any(is_less_than):
+                i = np.nonzero(is_less_than)[0][0]
+                raise ValueError(
+                        f"Radii must be >= `self.r0`(= {self.r0:g})."
+                        f" v[{i}] = {v[i]:g}."
+                        )
         if var == 'theta':
-            if self.tincr and np.any(v_ < self.t0):
-                raise ValueError(f"Angles must be >= `self.t0`(= {self.t0:g})."
-                                f"\nAngles:\n{v}.")
-            elif not self.tincr and np.any(v_ > self.t0):
-                raise ValueError(f"Angles must be <= `self.t0`(= {self.t0:g})."
-                                f"\nAngles:\n{v}.")
+            is_close = np.isclose(v_, self.t0, rtol=1e-8, atol=1e-15)
+            is_not_close = np.logical_not( is_close )
+            is_less_than = np.logical_and(is_not_close, (v_ < self.t0) )
+            is_greater_than = np.logical_and(is_not_close, (v_ > self.t0) )
+            if self.tincr and np.any(is_less_than):
+                i = np.nonzero(is_less_than)[0][0]
+                raise ValueError(
+                    f"Angles must be >= `self.t0`(= {self.t0:g})."
+                    f" v[{i}] = {v[i]:g}."
+                    )
+            elif not self.tincr and np.any(is_greater_than):
+                i = np.nonzero(is_greater_than)[0][0]
+                raise ValueError(
+                    f"Angles must be <= `self.t0`(= {self.t0:g})."
+                    f" v[{i}] = {v[i]:g}."
+                    )
 
     def arclength_to_r(self, s):
         """
@@ -301,7 +320,7 @@ class SpiralPolarBase(ABC):
             v0 = self.t0 if var=='theta' else self.r0
         v_ = np.array(v, dtype=np.float64, copy=None, ndmin=1)
         if var == 'r':
-            t0 = self.r_to_theta(v0)[0]
+            t0 = self.r_to_theta(v0)
             t = self.r_to_theta(v_)
         if var == 'theta':
             self._check_bounds(v0, 'theta')
@@ -362,7 +381,7 @@ class SpiralPolarBase(ABC):
         -------
         x, y : tuple
             Cartesian coordinates. If `v` is a scalar, `x` and `y` are floats,
-            else they are 1D *ndarray*\ s.
+            else they are 1D *ndarray*s.
 
         """
         r, theta = self.get_polar_coords(v, var)
@@ -372,7 +391,7 @@ class SpiralPolarBase(ABC):
 
     def get_polar_coords(self, v, var='s'):
         """
-        Returns the polar coordinates at the given values of polar coordinates
+        Returns the polar coordinates at the given values of `theta`, `r`,
         or arclengths.
 
         Parameters
@@ -387,7 +406,7 @@ class SpiralPolarBase(ABC):
         -------
         r, theta : tuple
             Polar coordinates. If `v` is a scalar, `r` and `theta` are 
-            floats, else they are 1D *ndarray*\ s.
+            floats, else they are 1D *ndarray*s.
 
         """
         if var not in ['r', 'theta', 's']:
@@ -411,32 +430,31 @@ class SpiralPolarBase(ABC):
 
 class SpiralCircleInvolute(SpiralPolarBase):
     """
-    Spirals with polar equation: *r = b * (1+theta^2)^(1/2)*, where *b* is the
-    radius of the circle. 
+    Spirals with polar equation: *r = b * (1+theta^2)^(1/2)*, where *b >= 0* is
+    the radius of the circle. 
 
-    The starting point is at *r* = :attr:`.r0` and *theta* = :attr:`.t0`. The
-    arclength *s* is measured from (:attr:`.r0`, :attr:`.t0`) in the direction of
-    increasing radius.
+    The starting point is at *r* = :attr:`.r0` and *theta* = :attr:`.t0`, where
+    *r0* must be > :attr:`.b`.
+
+    The arclength *s* is measured from (:attr:`.r0`, :attr:`.t0`) in the
+    direction of increasing radius.
 
     For all points on this spiral *r* must be >= :attr:`.r0`, *theta* must
     be >= :attr:`.t0`, and *s* must be >= 0.
 
+    Parameters
+    ----------
+    b : float
+        The radius of circle, must be >= 0.
+    r0 : 
+        Radial coordinate of the starting point of the spiral (must be > `b`).
+
     """
     def __init__(self, b, r0):
-        """
-        Parameters
-        ----------
-        b : float
-            The radius of circle, must be >= 0.
-        r0 : 
-            Radial coordinate of the starting point of the spiral
-            (must be >= `b`).
-
-        """
         if b <= 0:
             raise ValueError(f"`b`(= {b:g}) must be > 0.")
         if r0 <= b:
-            raise ValueError(f"`r0`(= {r0:g}) must be > {b:g}.")
+            raise ValueError(f"`r0`(= {r0:g}) must be > `b`(= {b:g}).")
         tincr = True
         self.b = b
         super().__init__(tincr, r0)
