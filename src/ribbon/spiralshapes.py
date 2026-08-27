@@ -211,11 +211,12 @@ def double_spiral(spiral, L, ds=0.5, same=False, end=1, f=0.0):
         kappa = np.concatenate((kappa_lin, kappa_ss))
     #Make double spiral
     s_ds = np.concatenate((L-s[:0:-1], L+s))
-    kappa_ds = np.concatenate((kappa[:0:-1], kappa))
     if same:
+        kappa_ds = np.concatenate((kappa[:0:-1], kappa))
         x_ds = np.concatenate( (-coords[:0:-1,0], coords[:,0]) )
         y_ds = np.concatenate( ( coords[:0:-1,1], coords[:,1]) )
     else:
+        kappa_ds = np.concatenate((kappa[:0:-1], -kappa))
         x_ds = np.concatenate( (-coords[:0:-1,0], coords[:,0]) )
         y_ds = np.concatenate( (-coords[:0:-1,1], coords[:,1]) )
 
