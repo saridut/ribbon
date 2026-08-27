@@ -63,11 +63,9 @@ class Ribbon(object):
         Grid spacing in the width direction.
     dt : float
         Grid spacing in the thickness direction. Ignored if `thickness = 0`.
-    atom_refpos : (n,3) ndarray
-        Atom positions in the reference state.
 
     """
-    def __init__(self, length, width, thickness, dl, dw, dt, atom_refpos=None):
+    def __init__(self, length, width, thickness, dl, dw, dt):
         if not ( isinstance(length, RealNumber) and length > 0 ):
             raise ValueError( f"`length`(= {length:g}) must be an instance of"
                 " numbers.Real or numpy.number and must be > 0.")
@@ -124,10 +122,30 @@ class Ribbon(object):
             self._msurf_du = np.zeros((0,0))
             self._msurf_dv = np.zeros_like(self._msurf_du)
             self._normals = np.zeros_like(self._msurf_du)
-        if atom_refpos is not None:
-            self.atom_refpos = np.asarray(atom_refpos, dtype=np.float64, copy=True)
-        else:
-            self.atom_refpos = np.zeros((0,0))
+        self.atom_refpos = np.zeros((0,0))
+        self.atom_pos = np.zeros_like(self.atom_refpos)
+        self._ap_ms = np.zeros_like(self.atom_pos)
+        self._ap_du = np.zeros_like(self.atom_pos)
+        self._ap_dv = np.zeros_like(self.atom_pos)
+        self._ap_normals = np.zeros_like(self.atom_pos)
+
+    def set_atom_refpos(self, atom_refpos):
+        """
+        Setter for the reference positions of atoms.
+
+        Parameters
+        ----------
+        atom_refpos : (n,3) ndarray
+            Atom positions in the reference state. Must be within the domain
+            [0, :attr:`.length`] x [-:attr:`.width`/2, :attr:`.width`/2] 
+            x [-:attr:`.thickness`/2, :attr:`.thickness`/2].
+
+        Returns
+        -------
+        None
+
+        """
+        self.atom_refpos = np.asarray(atom_refpos, dtype=np.float64, copy=True)
         self.atom_pos = np.zeros_like(self.atom_refpos)
         self._ap_ms = np.zeros_like(self.atom_pos)
         self._ap_du = np.zeros_like(self.atom_pos)

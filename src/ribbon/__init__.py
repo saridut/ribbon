@@ -7,7 +7,7 @@ from .spiralarchimedes import (SpiralArchimedesGeneral,
                                SpiralHyperbolic,
                                SpiralLituus)
 from .spiralcartesian import SpiralPolynomial, SpiralCornu, SpiralNielsen
-from .spiralshapes import double_spiral, extrude
+from .spiralshapes import write_xyz, double_spiral, extrude
 from .ribbon import Ribbon
 
 __all__ = ["Ribbon",
@@ -20,6 +20,7 @@ __all__ = ["Ribbon",
            "SpiralPolynomial",
            "SpiralCornu",
            "SpiralNielsen",
+           "write_xyz",
            "double_spiral",
            "extrude", 
            ]
