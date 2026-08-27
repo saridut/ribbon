@@ -387,7 +387,7 @@ class SpiralPolarBase(ABC):
         r, theta = self.get_polar_coords(v, var)
         x = r*np.cos(theta)
         y = r*np.sin(theta)
-        return (x[0], y[0]) if np.isscalar(v) else (x, y)
+        return (x, y) if np.isscalar(v) else (x, y)
 
     def get_polar_coords(self, v, var='s'):
         """
