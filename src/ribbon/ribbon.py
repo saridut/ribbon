@@ -1,11 +1,14 @@
 import copy
 import math
+import numbers
 import os
 import numpy as np
 from scipy.integrate import ode
 from scipy.interpolate import RectBivariateSpline
 import rotlib
 
+#Classes for real numbers.
+RealNumber = (numbers.Real, np.number)
 
 class Ribbon(object):
     """
@@ -65,18 +68,21 @@ class Ribbon(object):
 
     """
     def __init__(self, length, width, thickness, dl, dw, dt, atom_refpos=None):
-        if not ( isinstance(length, np.number) and length > 0 ):
-            raise ValueError( f"`length`(= {length}:g) must be a number > 0.")
+        if not ( isinstance(length, RealNumber) and length > 0 ):
+            raise ValueError( f"`length`(= {length:g}) must be an instance of"
+                " numbers.Real or numpy.number and must be > 0.")
         else:
             self.length = length
 
-        if not ( isinstance(width, np.number) and length > 0 ):
-            raise ValueError( f"`length`(= {width}:g) must be a number > 0.")
+        if not ( isinstance(width, RealNumber) and width > 0 ):
+            raise ValueError( f"`width`(= {width:g}) must be an instance of"
+                " numbers.Real or numpy.number and must be > 0.")
         else:
             self.width = width
 
-        if not ( isinstance(thickness, np.number) and length >= 0 ):
-            raise ValueError( f"`length`(= {thickness}:g) must be a number >= 0.")
+        if not ( isinstance(thickness, RealNumber) and thickness >= 0 ):
+            raise ValueError( f"`thickness`(= {thickness:g}) must be an instance of"
+                " numbers.Real or numpy.number and must be >= 0.")
         else:
             self.thickness = thickness
 
@@ -149,17 +155,17 @@ class Ribbon(object):
         -------
         None
         """
-        if not (isinstance(l, np.number) or callable(l) ):
+        if not (isinstance(l, RealNumber) or callable(l) ):
             raise ValueError(f"`l`(= {l}) must be a float or callable.")
         else:
             self.l = l
 
-        if not (isinstance(m, np.number) or callable(m) ):
+        if not (isinstance(m, RealNumber) or callable(m) ):
             raise ValueError(f"`m`(= {m}) must be a float or callable.")
         else:
             self.m = m
 
-        if not (isinstance(n, np.number) or callable(n) ):
+        if not (isinstance(n, RealNumber) or callable(n) ):
             raise ValueError(f"`n`(= {n}) must be a float or callable.")
         else:
             self.n = n
@@ -191,9 +197,10 @@ class Ribbon(object):
         -------
         float or tuple of 1D ndarrays
             Radius along the ribbon midline. If all curvatures are constants, a
-            *float* is returned. If any of the curvatures is *callable*, a tuple
-            *(x,y)* is returned, where *x* contains the arclength coordinates of
-            the ribbon midline and *y* contains the corresponding radii.
+            *float* is returned. If any of the curvatures is *callable*, a
+            tuple *(x,y)* is returned, where *x* contains the arclength
+            coordinates of the ribbon midline and *y* contains the
+            corresponding radii.
         """
         if not (callable(self.l) or callable(self.m)):
             if self.l == self.m == 0:
@@ -220,10 +227,11 @@ class Ribbon(object):
         Returns
         -------
         float or tuple of 1D ndarrays
-            Pitch along the the ribbons midline. If all curvatures are constants, a
-            *float* is returned. If any of the curvatures is *callable*, a tuple
-            *(x,y)* is returned, where *x* contains the arclength coordinates of
-            the ribbon midline and *y* contains the corresponding pitch values.
+            Pitch along the the ribbons midline. If all curvatures are
+            constants, a *float* is returned. If any of the curvatures is
+            *callable*, a tuple *(x,y)* is returned, where *x* contains the
+            arclength coordinates of the ribbon midline and *y* contains the
+            corresponding pitch values.
         """
         if not (callable(self.l) or callable(self.m)):
             if self.l == self.m == 0:
@@ -309,16 +317,16 @@ class Ribbon(object):
 
     def get_theta(self):
         """
-        Returns the angle (in radians) between the principal curvature direction
-        and the lengthwise direction along the ribbon midline.
+        Returns the angle (in radians) between the principal curvature
+        direction and the lengthwise direction along the ribbon midline.
 
         Returns
         -------
         float or tuple of 1D ndarrays
             Angle (in radians). If all curvatures are constants, a *float* is
-            returned. If any of the curvatures is *callable*, a tuple *(x,y)* is
-            returned, where *x* contains the arclength coordinates of the ribbon
-            midline and *y* contains the corresponding angle.
+            returned. If any of the curvatures is *callable*, a tuple *(x,y)*
+            is returned, where *x* contains the arclength coordinates of the
+            ribbon midline and *y* contains the corresponding angle.
         """
         if not (callable(self.l) or callable(self.m) or callable(self.n)):
             theta = 0.5*math.atan(2*self.m/(self.l-self.n)) \
@@ -430,7 +438,7 @@ class Ribbon(object):
         self._create_msga()
 
         #Determining the axis of the midline helix: First evaluate the helix at
-        #a point one turn away.
+        #a point one turn away from the starting point.
         if orient_along is None:
             return
         gamag = math.hypot(*orient_along[0:3])
@@ -442,7 +450,7 @@ class Ribbon(object):
         
         u = 2*math.pi*iomega_mag
         p = np.array([
-            omega[0]*omega[2]*iomega_mag2*u,
+            -omega[0]*omega[2]*iomega_mag2*u,
             0,
             omega[2]*omega[2]*iomega_mag2*u
             ])
