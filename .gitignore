@@ -44,6 +44,7 @@ cover/
 
 # Sphinx documentation
 docs/build/
+gh-pages/
 
 # Jupyter Notebook
 .ipynb_checkpoints
