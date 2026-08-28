@@ -1,4 +1,6 @@
-# Generating NPL configurations
+# Ribbon equations
+
+## Generating NPL configurations
 
 We are interested in generating NPL configurations for specified values of
 curvatures. We will not consider the ligands explicitly, though the method can
@@ -122,10 +124,40 @@ the solution is simply a quaternion multiplication:
             + \frac{\bs{\upomega}}{\omag} \sin \frac{\omag u}{2} \Big] \bm{q}(0)
 \end{equation}
 
-We will go ahead and write down the analytical equations for the Darboux frame
-vectors, then integrate the tangent $\bm{d}_3$ and write down the
-centerline coordinates in analytical form (one can just do it by hand). Thus we
-obtain:
+The director vectors $\bm{d}_i$ can be obtained from $\bm{q}$ by using the
+the following transformation equations from quaternion to a direction cosine
+matrix:
+
+\begin{align}
+\bm{d}_1 &= \left[ 
+                2\left(q_0^2 + q_1^2\right) - 1 ,
+                2\left(q_1 q_2 + q_0 q_3 \right),
+                2\left(q_1 q_3 - q_0 q_2 \right)
+             \right] \\
+\bm{d}_2 &= \left[ 
+                2\left(q_1 q_2 - q_0 q_3 \right),
+                2\left(q_0^2 + q_2^2\right) - 1 ,
+                2\left(q_2 q_3 + q_0 q_1 \right)
+             \right] \\
+\bm{d}_3 &= \left[ 
+                2\left(q_1 q_3 + q_0 q_2 \right),
+                2\left(q_2 q_3 - q_0 q_1 \right),
+                2\left(q_0^2  - q_3^2\right) - 1
+             \right]
+\end{align}
+
+where
+
+\begin{align}
+q_0 &= \cos \left(\frac{\omag u}{2} \right) \\
+q_1 &= -\frac{\upomega_1}{\omag}\sin \left(\frac{\omag u}{2} \right) \\
+q_2 &= -\frac{\upomega_2}{\omag}\sin \left(\frac{\omag u}{2} \right) \\
+q_3 &= -\frac{\upomega_3}{\omag}\sin \left(\frac{\omag u}{2} \right).
+\end{align}
+
+After substitution and rearrangement, and recalling that $\upomega_2 = 0$, we
+have the analytical equations for the Darboux frame
+vectors:
 
 \begin{align}
 \bm{d}_1 &= 
@@ -145,16 +177,23 @@ obtain:
         \frac{\upomega_1\upomega_3}{\omag^2} \Big (1 - \cos \omag u \Big),
         \frac{\upomega_1}{\omag} \sin \omag u,
         \frac{\upomega_3^2}{\omag^2} \Big (1 - \cos \omag u \Big) + \cos \omag u 
-    \Bigg] \\
-\bm{R}(u,0,0) &= 
+    \Bigg].
+\end{align}
+
+Next we integrate the tangent vector $\bm{d}_3$ with initial condition
+$\bm{R}(u,0,0) = [0, 0, 0]$ at $u = 0$ to obtain the centerline coordinates in
+analytical form:
+
+\begin{equation}
+\bm{R}(u,0,0) = 
     \Bigg[ 
         \frac{\upomega_1\upomega_3}{\omag^2} 
             \Big( u - \frac{\sin \omag u}{\omag}\Big ),
         \frac{\upomega_1}{\omag^2}\Big(1-\cos \omag u \Big),
         \frac{\upomega_3^2}{\omag^2}\Big( u - \frac{\sin \omag u}{\omag}\Big )
             + \frac{\sin \omag u}{\omag} 
-    \Bigg]
-\end{align}
+    \Bigg].
+\end{equation}
 
 We can go ahead further and calculate the surface normals analytically, but we
 will not do so as it becomes computationally expensive to use the analytical

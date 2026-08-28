@@ -4,6 +4,7 @@ ribbon |version|
 .. toctree::
    :maxdepth: 1
 
-   notes
+   ribbons
+   spirals
    modules 
 
