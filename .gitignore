@@ -60,6 +60,7 @@ ENV/
 env.bak/
 venv.bak/
 
-# Temporaries
+# Temporaries and others
 *.swp
 .DS_Store
+cases/
