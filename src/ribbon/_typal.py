@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import numpy as np
 
 type Vecf = np.ndarray[tuple[int], np.dtype[np.float64]]

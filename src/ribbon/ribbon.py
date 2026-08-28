@@ -1,13 +1,14 @@
-#!/usr/bin/env python
-
 import copy
 import math
+import numbers
 import os
 import numpy as np
 from scipy.integrate import ode
 from scipy.interpolate import RectBivariateSpline
-from . import xform
+import rotlib
 
+#Classes for real numbers.
+RealNumber = (numbers.Real, np.number)
 
 class Ribbon(object):
     """
@@ -62,23 +63,24 @@ class Ribbon(object):
         Grid spacing in the width direction.
     dt : float
         Grid spacing in the thickness direction. Ignored if `thickness = 0`.
-    atom_refpos : (n,3) ndarray
-        Atom positions in the reference state.
 
     """
-    def __init__(self, length, width, thickness, dl, dw, dt, atom_refpos=None):
-        if not ( isinstance(length, np.number) and length > 0 ):
-            raise ValueError( f"`length`(= {length}:g) must be a number > 0.")
+    def __init__(self, length, width, thickness, dl, dw, dt):
+        if not ( isinstance(length, RealNumber) and length > 0 ):
+            raise ValueError( f"`length`(= {length:g}) must be an instance of"
+                " numbers.Real or numpy.number and must be > 0.")
         else:
             self.length = length
 
-        if not ( isinstance(width, np.number) and length > 0 ):
-            raise ValueError( f"`length`(= {width}:g) must be a number > 0.")
+        if not ( isinstance(width, RealNumber) and width > 0 ):
+            raise ValueError( f"`width`(= {width:g}) must be an instance of"
+                " numbers.Real or numpy.number and must be > 0.")
         else:
             self.width = width
 
-        if not ( isinstance(thickness, np.number) and length >= 0 ):
-            raise ValueError( f"`length`(= {thickness}:g) must be a number >= 0.")
+        if not ( isinstance(thickness, RealNumber) and thickness >= 0 ):
+            raise ValueError( f"`thickness`(= {thickness:g}) must be an instance of"
+                " numbers.Real or numpy.number and must be >= 0.")
         else:
             self.thickness = thickness
 
@@ -120,10 +122,30 @@ class Ribbon(object):
             self._msurf_du = np.zeros((0,0))
             self._msurf_dv = np.zeros_like(self._msurf_du)
             self._normals = np.zeros_like(self._msurf_du)
-        if atom_refpos is not None:
-            self.atom_refpos = np.asarray(atom_refpos, dtype=np.float64, copy=True)
-        else:
-            self.atom_refpos = np.zeros((0,0))
+        self.atom_refpos = np.zeros((0,0))
+        self.atom_pos = np.zeros_like(self.atom_refpos)
+        self._ap_ms = np.zeros_like(self.atom_pos)
+        self._ap_du = np.zeros_like(self.atom_pos)
+        self._ap_dv = np.zeros_like(self.atom_pos)
+        self._ap_normals = np.zeros_like(self.atom_pos)
+
+    def set_atom_refpos(self, atom_refpos):
+        """
+        Setter for the reference positions of atoms.
+
+        Parameters
+        ----------
+        atom_refpos : (n,3) ndarray
+            Atom positions in the reference state. Must be within the domain
+            [0, :attr:`.length`] x [-:attr:`.width`/2, :attr:`.width`/2] 
+            x [-:attr:`.thickness`/2, :attr:`.thickness`/2].
+
+        Returns
+        -------
+        None
+
+        """
+        self.atom_refpos = np.asarray(atom_refpos, dtype=np.float64, copy=True)
         self.atom_pos = np.zeros_like(self.atom_refpos)
         self._ap_ms = np.zeros_like(self.atom_pos)
         self._ap_du = np.zeros_like(self.atom_pos)
@@ -151,17 +173,17 @@ class Ribbon(object):
         -------
         None
         """
-        if not (isinstance(l, np.number) or callable(l) ):
+        if not (isinstance(l, RealNumber) or callable(l) ):
             raise ValueError(f"`l`(= {l}) must be a float or callable.")
         else:
             self.l = l
 
-        if not (isinstance(m, np.number) or callable(m) ):
+        if not (isinstance(m, RealNumber) or callable(m) ):
             raise ValueError(f"`m`(= {m}) must be a float or callable.")
         else:
             self.m = m
 
-        if not (isinstance(n, np.number) or callable(n) ):
+        if not (isinstance(n, RealNumber) or callable(n) ):
             raise ValueError(f"`n`(= {n}) must be a float or callable.")
         else:
             self.n = n
@@ -193,9 +215,10 @@ class Ribbon(object):
         -------
         float or tuple of 1D ndarrays
             Radius along the ribbon midline. If all curvatures are constants, a
-            *float* is returned. If any of the curvatures is *callable*, a tuple
-            *(x,y)* is returned, where *x* contains the arclength coordinates of
-            the ribbon midline and *y* contains the corresponding radii.
+            *float* is returned. If any of the curvatures is *callable*, a
+            tuple *(x,y)* is returned, where *x* contains the arclength
+            coordinates of the ribbon midline and *y* contains the
+            corresponding radii.
         """
         if not (callable(self.l) or callable(self.m)):
             if self.l == self.m == 0:
@@ -222,10 +245,11 @@ class Ribbon(object):
         Returns
         -------
         float or tuple of 1D ndarrays
-            Pitch along the the ribbons midline. If all curvatures are constants, a
-            *float* is returned. If any of the curvatures is *callable*, a tuple
-            *(x,y)* is returned, where *x* contains the arclength coordinates of
-            the ribbon midline and *y* contains the corresponding pitch values.
+            Pitch along the the ribbons midline. If all curvatures are
+            constants, a *float* is returned. If any of the curvatures is
+            *callable*, a tuple *(x,y)* is returned, where *x* contains the
+            arclength coordinates of the ribbon midline and *y* contains the
+            corresponding pitch values.
         """
         if not (callable(self.l) or callable(self.m)):
             if self.l == self.m == 0:
@@ -311,16 +335,16 @@ class Ribbon(object):
 
     def get_theta(self):
         """
-        Returns the angle (in radians) between the principal curvature direction
-        and the lengthwise direction along the ribbon midline.
+        Returns the angle (in radians) between the principal curvature
+        direction and the lengthwise direction along the ribbon midline.
 
         Returns
         -------
         float or tuple of 1D ndarrays
             Angle (in radians). If all curvatures are constants, a *float* is
-            returned. If any of the curvatures is *callable*, a tuple *(x,y)* is
-            returned, where *x* contains the arclength coordinates of the ribbon
-            midline and *y* contains the corresponding angle.
+            returned. If any of the curvatures is *callable*, a tuple *(x,y)*
+            is returned, where *x* contains the arclength coordinates of the
+            ribbon midline and *y* contains the corresponding angle.
         """
         if not (callable(self.l) or callable(self.m) or callable(self.n)):
             theta = 0.5*math.atan(2*self.m/(self.l-self.n)) \
@@ -432,7 +456,7 @@ class Ribbon(object):
         self._create_msga()
 
         #Determining the axis of the midline helix: First evaluate the helix at
-        #a point one turn away.
+        #a point one turn away from the starting point.
         if orient_along is None:
             return
         gamag = math.hypot(*orient_along[0:3])
@@ -444,7 +468,7 @@ class Ribbon(object):
         
         u = 2*math.pi*iomega_mag
         p = np.array([
-            omega[0]*omega[2]*iomega_mag2*u,
+            -omega[0]*omega[2]*iomega_mag2*u,
             0,
             omega[2]*omega[2]*iomega_mag2*u
             ])
@@ -453,25 +477,25 @@ class Ribbon(object):
             axis = np.array([-1,0,0])
         else:
             axis = p/pmag
-        self.mline[:,:] = xform.align(self.mline, axis, gaxis)
-        self._d1[:,:] = xform.align(self._d1, axis, gaxis)
-        self._d2[:,:] = xform.align(self._d2, axis, gaxis)
+        self.mline[:,:] = rotlib.align(self.mline, axis, gaxis)
+        self._d1[:,:] = rotlib.align(self._d1, axis, gaxis)
+        self._d2[:,:] = rotlib.align(self._d2, axis, gaxis)
 
         shp = self.msurf.shape
         tmp = self.msurf.reshape(shp[0]*shp[1],3)
-        self.msurf[:,:] = xform.align(tmp, axis, gaxis).reshape(shp)
+        self.msurf[:,:] = rotlib.align(tmp, axis, gaxis).reshape(shp)
 
         shp = self.grid.shape
         tmp = self.grid.reshape(math.prod(shp[0:-1]),3)
-        self.grid[...] = xform.align(tmp, axis, gaxis).reshape(shp)
+        self.grid[...] = rotlib.align(tmp, axis, gaxis).reshape(shp)
 
         if self.atom_refpos.shape[0] > 0:
-            self.atom_pos[:,:] = xform.align(self.atom_pos, axis, gaxis)
+            self.atom_pos[:,:] = rotlib.align(self.atom_pos, axis, gaxis)
 
     @staticmethod
     def _rhs(u, y, l, m):
         ydot = np.zeros_like(y)
-        xform.normalize_quat(y[0:4])
+        rotlib.normalize_quat(y[0:4])
         omega = [l(u), 0, -m(u)]
 
         ydot[0] = 0.5*( -omega[0]*y[1] - omega[2]*y[3] )
@@ -487,7 +511,7 @@ class Ribbon(object):
     def _create_ode(self, orient_along):
         def rhs(u, y, l, m):
             ydot = np.zeros_like(y)
-            xform.normalize_quat(y[0:4])
+            rotlib.normalize_quat(y[0:4])
             omega = [l(u), 0, -m(u)]
 
             ydot[0] = 0.5*( -omega[0]*y[1] - omega[2]*y[3] )
@@ -516,9 +540,9 @@ class Ribbon(object):
             if not solver.successful():
                 print('Status = ', solver.get_return_code())
                 raise RuntimeError('ODE solver failed.')
-            xform.normalize_quat(y[0:4])
+            rotlib.normalize_quat(y[0:4])
             self.mline[i,:] = y[4:]
-            dcm = xform.quat_to_dcm(y[0:4])
+            dcm = rotlib.quat_to_dcm(y[0:4])
             self._d1[i,:] = dcm[0,:]
             self._d2[i,:] = dcm[1,:]
             self._d3[i,:] = dcm[2,:]
@@ -599,76 +623,3 @@ class Ribbon(object):
                 self._ap_normals /= norm
                 tmp = np.einsum('ij,i->ij',self._ap_normals, self.atom_refpos[:,2])
                 self.atom_pos[:,:] = self._ap_ms + tmp
-
-
-if __name__ == '__main__':
-
-    length = 20
-    width = 2
-    thickness = 0.0
-    l = 0.4
-    #l = lambda x: 0.5 *(1-x/length)
-    #l = lambda x: 0.2 *(x**0.4)
-    m = 0.4 #lambda x: 0.5 #*(1-x/length) #+ve right handed, -ve left handed
-    n = 0.4 #lambda x: 0.5*np.cos(x) #0.5
-    #n = lambda x: 0.5*(1-x/length)
-    
-#   atom_coords = []
-#   for x in np.arange(0, length+0.025, 0.4):
-#       for y in np.arange(-width/2, 0.025+width/2, 0.4):
-#           for z in np.arange(-thickness/2, 0.025+thickness/2, 0.3):
-#               atom_coords.append([x,y,z])
-
-    #ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.08, np.asarray(atom_coords))
-    ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.08)
-    ribbon.set_curvatures(l, m, n)
-    #out = ribbon.get_radius()
-    #if isinstance(out, tuple):
-    #    for x,y in zip(out[0],out[1]):
-    #        print(f"{x:g}  {y:g}") 
-    #else:
-    #    print(f"R = {out}")
-    #print(f"R = {ribbon.get_radius()}\n"
-    #      f"P = {ribbon.get_pitch()}\n"
-    #      f"kg = {ribbon.get_gauss_curvature()}\n"
-    #      f"km = {ribbon.get_mean_curvature()}\n"
-    #      f"theta = {ribbon.get_theta()}")
-    #raise SystemExit()
-    ribbon.create(orient_along=[0,0,1])
-
-
-    figh, axh = plt.subplots(nrows=1, ncols=1 ,
-            subplot_kw={'projection':'3d', 'proj_type': 'ortho'},
-                             figsize=(12,9))
-
-    axh.plot(ribbon.mline[:,0], ribbon.mline[:,1], ribbon.mline[:,2], '-k', lw=1.2)
-    axh.plot(ribbon.mline[0,0], ribbon.mline[0,1], ribbon.mline[0,2], 'or')
-
-    #axh.plot_surface(ribbon.msurf[:,:,0], ribbon.msurf[:,:,1],
-    #            ribbon.msurf[:,:,2], facecolor='r', edgecolor='0.6', lw=0.7, alpha=0.4,
-    #            rstride=4, cstride=8)
-
-    axh.plot_wireframe(ribbon.msurf[:,:,0], ribbon.msurf[:,:,1],
-                ribbon.msurf[:,:,2], linestyles='-', linewidths=0.5,
-                rstride=2, cstride=8, color='0.5')
-    
-    frl = np.linspace(0,ribbon.u.size-1,10, dtype=np.int32)
-    axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
-               ribbon._d1[frl,0], ribbon._d1[frl,1], ribbon._d1[frl,2],
-               length=1.2, color='r')
-    axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
-               ribbon._d2[frl,0], ribbon._d2[frl,1], ribbon._d2[frl,2],
-               length=1.2, color='g')
-    axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
-               ribbon._d3[frl,0], ribbon._d3[frl,1], ribbon._d3[frl,2],
-               length=1.2, color='b')
-
-    axh.set_aspect('equal', 'box')
-    #axh.set_xlabel('x')
-    #axh.set_ylabel('y')
-    #axh.set_zlabel('z')
-    #axh.set_xticks(axh.get_xlim())
-    #axh.set_yticks([])
-    #axh.set_zticks([])
-    axh.set_axis_off()
-    plt.show()

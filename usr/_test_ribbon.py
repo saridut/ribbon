@@ -4,10 +4,7 @@ import math
 import numpy as np
 import matplotlib as mpl
 import matplotlib.ticker as ticr
-from scipy.special import fresnel
-from scipy.integrate import romb
-from spirals import *
-
+from ribbon import Ribbon
 
 #######################################################################
 ###FIGURE
@@ -109,98 +106,92 @@ text_prop = {'usetex': True,
 ###PS & EPS BACKEND
 ps_prop = {'useafm': True}
 
-mpl.rc('figure', **fig_prop  )
-mpl.rc('axes',   **axes_prop )
-mpl.rc('lines',  **lines_prop)
-mpl.rc('patch',  **patch_prop)
-mpl.rc('xtick',  **xtick_prop)
-mpl.rc('ytick',  **ytick_prop)
-mpl.rc('grid',  **grid_prop)
-mpl.rc('legend', **leg_prop  )
-#mpl.rc('font',   **font_prop )
-mpl.rc('text',   **text_prop )
-mpl.rc('ps',     **ps_prop   )
+#mpl.rc('figure', **fig_prop  )
+#mpl.rc('axes',   **axes_prop )
+#mpl.rc('lines',  **lines_prop)
+#mpl.rc('patch',  **patch_prop)
+#mpl.rc('xtick',  **xtick_prop)
+#mpl.rc('ytick',  **ytick_prop)
+#mpl.rc('grid',  **grid_prop)
+#mpl.rc('legend', **leg_prop  )
+##mpl.rc('font',   **font_prop )
+#mpl.rc('text',   **text_prop )
+#mpl.rc('ps',     **ps_prop   )
 
 #######################################################################
-mpl.use('PDF')
+#mpl.use('PDF')
 import matplotlib.pyplot as plt
-
 
 #Plotting
 figh, axh = plt.subplots(nrows=1, ncols=1)
 
-L = 100
-cnst_a = 1
-cnst_b = 1.6
-#cnst_b = 0.11
-rmin = 0.0
+length = 20
+width = 2
+thickness = 0.0
+l = 0.4
+#l = lambda x: 0.5 *(1-x/length)
+#l = lambda x: 0.2 *(x**0.4)
+m = 0.4 #lambda x: 0.5 #*(1-x/length) #+ve right handed, -ve left handed
+n = 0.4 #lambda x: 0.5*np.cos(x) #0.5
+#n = lambda x: 0.5*(1-x/length)
+    
+#   atom_coords = []
+#   for x in np.arange(0, length+0.025, 0.4):
+#       for y in np.arange(-width/2, 0.025+width/2, 0.4):
+#           for z in np.arange(-thickness/2, 0.025+thickness/2, 0.3):
+#               atom_coords.append([x,y,z])
 
-for cnst_b in [1.6]:
-    sa = SpiralArchimedes(cnst_b, rmin)
-#sa = SpiralFermat(cnst_b, rmin)
-#sa = SpiralLogarithmic(cnst_a, cnst_b, rmin)
-#sa = SpiralClothoid(cnst_a)
-
-#ds = DoubleSpiral(sa, 2*L, 'D', is_tapered=True, taper_angle=math.radians(35))
-
-    n = 257
-    s = np.linspace(0, L, n)
-    kappa = sa.get_curvature(s, 's')
-    ds = L/(n-1)
-    xdata, ydata = sa.get_cart_coords(0, L, ds, 's')
-    av_kappa = romb(kappa*s, dx=ds)/romb(s, dx=ds)
-    av_rho = 1/av_kappa
-    #av_rho = 1/np.mean(kappa)
-    print(av_rho)
-    #with open('sa_b_1.6_L_100_rmin_0.txt', 'w') as fh:
-    #    fh.write('x,y,s,kappa\n')
-    #    for i in range(len(s)):
-    #        fh.write('%g,%g,%g,%g\n'%(xdata[i], ydata[i], s[i], kappa[i]))
-    #axh.plot(xdata, ydata, ls='-', lw=4, marker='None', label='_nolegend_')
-
-
-#xdata, ydata = sa.get_cart_coords(0, L, 0.1, 's')
-#axh.plot(xdata, ydata, ls='-', lw=1.2, marker='None', c = '0.6',
-#     label=r'$b = %g, r_{\mathrm{min}} = %g$'%(cnst_b, rmin))
-#
-#axh.plot([0], [0], ls='None', marker='x', c = '0.6',
-#     label=r'$b = %g, r_{\mathrm{min}} = %g$'%(cnst_b, rmin))
-#axh.plot(-xdata, ydata, ls='-', lw=1.2, marker='None', c = 'r',
-#     label=r'$b = %g, r_{\mathrm{min}} = %g$'%(cnst_b, rmin))
-#axh.plot([-cnst_a/2], [cnst_a/2], ls='None', marker='x', c = 'r',
-#     label=r'$b = %g, r_{\mathrm{min}} = %g$'%(cnst_b, rmin))
-
-#xdata, ydata, n = ds.get_cart_coords(0.1)
-#axh.plot(xdata[0:n], ydata[0:n], ls='-', marker='None', c = '0.6',
-#     label=r'$b = %g, r_{\mathrm{min}} = %g$'%(cnst_b, rmin))
-#axh.plot(xdata[n:], ydata[n:], ls='-', marker='None', c = 'r',
-#     label=r'$b = %g, r_{\mathrm{min}} = %g$'%(cnst_b, rmin))
-#axh.plot([-cnst_a/2, cnst_a/2], [-cnst_a/2, cnst_a/2], ls='None', marker='x', c = '0.6',
-#     label=r'$b = %g, r_{\mathrm{min}} = %g$'%(cnst_b, rmin))
-
-#func_kappa = lambda x: np.tanh(x)
-#sl = SpiralGeneral(func_kappa)
-#s = sl.get_arclength(sf.tmin, sf.tmin+4*math.pi)
-#xdata, ydata = sl.get_cart_coords(0, 5, 0.1)
-#axh.plot(xdata, ydata, ls=':', marker='.', c = 'k',
-#    label=r'$b = %g, r_{\mathrm{min}} = %g$'%(cnst_b, rmin))
+    #ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.08, np.asarray(atom_coords))
+ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.08)
+ribbon.set_curvatures(l, m, n)
+#out = ribbon.get_radius()
+#if isinstance(out, tuple):
+#    for x,y in zip(out[0],out[1]):
+#        print(f"{x:g}  {y:g}") 
+#else:
+#    print(f"R = {out}")
+#print(f"R = {ribbon.get_radius()}\n"
+#      f"P = {ribbon.get_pitch()}\n"
+#      f"kg = {ribbon.get_gauss_curvature()}\n"
+#      f"km = {ribbon.get_mean_curvature()}\n"
+#      f"theta = {ribbon.get_theta()}")
+#raise SystemExit()
+ribbon.create(orient_along=[0,0,1])
 
 
-axh.set_aspect('equal')
+figh, axh = plt.subplots(nrows=1, ncols=1 ,
+        subplot_kw={'projection':'3d', 'proj_type': 'ortho'},
+                         figsize=(12,9))
+
+axh.plot(ribbon.mline[:,0], ribbon.mline[:,1], ribbon.mline[:,2], '-k', lw=1.2)
+axh.plot(ribbon.mline[0,0], ribbon.mline[0,1], ribbon.mline[0,2], 'or')
+
+#axh.plot_surface(ribbon.msurf[:,:,0], ribbon.msurf[:,:,1],
+#            ribbon.msurf[:,:,2], facecolor='r', edgecolor='0.6', lw=0.7, alpha=0.4,
+#            rstride=4, cstride=8)
+
+axh.plot_wireframe(ribbon.msurf[:,:,0], ribbon.msurf[:,:,1],
+            ribbon.msurf[:,:,2], linestyles='-', linewidths=0.5,
+            rstride=2, cstride=8, color='0.5')
+
+frl = np.linspace(0,ribbon.u.size-1,10, dtype=np.int32)
+axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
+           ribbon._d1[frl,0], ribbon._d1[frl,1], ribbon._d1[frl,2],
+           length=1.2, color='r')
+axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
+           ribbon._d2[frl,0], ribbon._d2[frl,1], ribbon._d2[frl,2],
+           length=1.2, color='g')
+axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
+           ribbon._d3[frl,0], ribbon._d3[frl,1], ribbon._d3[frl,2],
+           length=1.2, color='b')
+
+axh.set_aspect('equal', 'box')
+#axh.set_xlabel('x')
+#axh.set_ylabel('y')
+#axh.set_zlabel('z')
+#axh.set_xticks(axh.get_xlim())
+#axh.set_yticks([])
+#axh.set_zticks([])
 axh.set_axis_off()
-#axh.grid(True)
-#axh.tick_params(which='both', top=True, right=True, color='0.5')
-#axh.set_xscale('linear')
-#axh.set_yscale('linear')
-#legend = axh.legend(loc='best', ncol=1)
+plt.show()
 
-#axh.set_xlim(-2, 2)
-#axh.set_ylim(-2, 2)
-
-#axh.xaxis.set_minor_locator(ticr.AutoMinorLocator(n=4))
-#axh.yaxis.set_minor_locator(ticr.AutoMinorLocator(n=4))
-
-#axh.set_xlabel(r'$s\;(\mathrm{nm})$', labelpad=5.0)
-#axh.set_ylabel(r'$\rho\;(\mathrm{nm})$', labelpad=5.0)
-#plt.savefig('fig-cspiral.pdf', transparent=True)
-plt.close()

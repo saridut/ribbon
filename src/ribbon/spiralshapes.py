@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Functions to construct shapes based on plane spirals.
 
@@ -8,11 +7,48 @@ import numpy as np
 from .spiralcartesian import SpiralCornu
 
 
-def extrude(xcoords, ycoords, zdist, dz, atom_symbol='C',
-            filename='out.xyz', title=''):
+def write_xyz(x, y, z, atom_symbol='C', filename='out.xyz', title=''):
     """
-    Creates a sheet of monoatomic thickness by extruding a spiral and saves the
-    atom positions to a file.
+    Writes atom positions to a XYZ file.
+
+    Parameters
+    ----------
+    x, y, z : 1D array_like
+        *x*, *y*, and *z* coordinates of the atoms. All three must have the
+        same length.
+    atom_symbol : str
+        Atom symbol. If more than two characters, will be trucated to the first
+        two characters.
+    filename : path_like
+        Name of output file (XYZ format) with extension '.xyz'.
+    title : str
+        A title string for the XYZ file.
+
+    Returns
+    -------
+    None
+
+    """
+    if not (len(x)==len(y)==len(z)):
+        raise ValueError("x, y, and z must have the same length."
+                f" len(x) = {len(x)}, len(y) = {len(y)}, len(z) = {len(z)}.")
+    if len(atom_symbol) > 2:
+        print(f"Truncating atom_symbol(= {atom_symbol} to {atom_symbol[:2]}.")
+        sym = atom_symbol[0:2]
+    else:
+        sym = atom_symbol
+    num_atoms = len(x)
+    with open(filename, 'w') as fh:
+        fh.write(f"{num_atoms}\n")
+        fh.write(f"{title}\n")
+        for i in range(num_atoms):
+            fh.write(f"{sym} {x[i]:g} {y[i]:g} {z[i]:g}\n")
+
+
+def extrude(xcoords, ycoords, zdist, dz):
+    """
+    Creates a sheet of monoatomic thickness by extruding a spiral and returns the
+    positions of the atoms of the sheet.
 
     Parameters
     ----------
@@ -22,13 +58,6 @@ def extrude(xcoords, ycoords, zdist, dz, atom_symbol='C',
         Extrusion distance (along *z*-direction)
     dz : float
         Spacing along the *z*-direction
-    atom_symbol : str
-        Atom symbol. If more than two characters, will be trucated to the first
-        two characters.
-    filename : path_like
-        Name of output file (XYZ format) with extension '.xyz'.
-    title : str
-        A title string for the XYZ file.
 
     Returns
     -------
@@ -51,11 +80,6 @@ def extrude(xcoords, ycoords, zdist, dz, atom_symbol='C',
         raise ValueError(f"`dz`(= {dz:g}) must be >= 0.")
     if (zdist>0.0) and (zdist < dz):
         raise ValueError(f"`zdist`(= {zdist:g}) must be >= dz.")
-    if len(atom_symbol) > 2:
-        print(f"Truncating atom_symbol(= {atom_symbol} to {atom_symbol[:2]}.")
-        sym = atom_symbol[0:2]
-    else:
-        sym = atom_symbol
     if zdist==0.0:
         z = np.array([0.0], dtype=np.float64)
     else:
@@ -69,19 +93,15 @@ def extrude(xcoords, ycoords, zdist, dz, atom_symbol='C',
 
     #Fill coordinate arrays and write to file
     nx = x.size; nz = z.size
-    with open(filename, 'w') as fh:
-        fh.write(f"{num_atoms}\n")
-        fh.write(f"{title}\n")
-        for k in range(nz):
-            zval = z[k]
-            for i in range(nx):
-                xval = x[i]
-                yval = y[i]
-                j = k*nx + i
-                X[j] = xval
-                Y[j] = yval
-                Z[j] = zval
-                fh.write(f"{sym} {xval:g} {yval:g} {zval:g}\n")
+    for k in range(nz):
+        zval = z[k]
+        for i in range(nx):
+            xval = x[i]
+            yval = y[i]
+            j = k*nx + i
+            X[j] = xval
+            Y[j] = yval
+            Z[j] = zval
     return (X, Y, Z)
 
 
@@ -212,11 +232,12 @@ def double_spiral(spiral, L, ds=0.5, same=False, end=1, f=0.0):
         kappa = np.concatenate((kappa_lin, kappa_ss))
     #Make double spiral
     s_ds = np.concatenate((L-s[:0:-1], L+s))
-    kappa_ds = np.concatenate((kappa[:0:-1], kappa))
     if same:
+        kappa_ds = np.concatenate((kappa[:0:-1], kappa))
         x_ds = np.concatenate( (-coords[:0:-1,0], coords[:,0]) )
         y_ds = np.concatenate( ( coords[:0:-1,1], coords[:,1]) )
     else:
+        kappa_ds = np.concatenate((kappa[:0:-1], -kappa))
         x_ds = np.concatenate( (-coords[:0:-1,0], coords[:,0]) )
         y_ds = np.concatenate( (-coords[:0:-1,1], coords[:,1]) )
 

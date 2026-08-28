@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Classes for spirals described by the polar equation *r = b * theta^n*.
 
@@ -29,22 +28,20 @@ class SpiralArchimedesBase(SpiralPolarBase, metaclass=ABCMeta):
         Exponent in the polar equation. Must be non-zero. If negative, then
         :attr:`.r0` must be > 0.
 
+    Parameters
+    ----------
+    b : float
+        Parameter in the polar equation. Must be > 0.
+    n : float
+        Exponent in the polar equation. Must be non-zero. If negative, then
+        `r0` must be > 0.
+    r0 : float
+        The spiral curve segment begins at (*r* = `r0`). Must be a
+        non-negative value.
+
     """
 
     def __init__(self, b, n, r0):
-        """
-        Parameters
-        ----------
-        b : float
-            Parameter in the polar equation. Must be > 0.
-        n : float
-            Exponent in the polar equation. Must be non-zero. If negative, then
-            `r0` must be > 0.
-        r0 : float
-            The spiral curve segment begins at (*r* = `r0`). Must be a
-            non-negative value.
-
-        """
         if b <= 0:
             raise ValueError(f"`b`(= {b:g}) must be > 0.")
         if n == 0:
@@ -211,6 +208,13 @@ class SpiralFermat(SpiralArchimedesBase):
     For all points on this spiral *r* must be >= :attr:`.r0`, *s* must be >= 0,
     and *theta* must be >= :attr:`.t0`.
 
+    Parameters
+    ----------
+    b : float
+        Parameter in the polar equation. Must be > 0.
+    r0 : float
+        The spiral curve segment begins at (*r* = `r0`). Must be a
+        non-negative value.
     '''
     def __init__(self, b, r0):
         super().__init__(b, 1/2, r0)
@@ -243,6 +247,13 @@ class SpiralHyperbolic(SpiralArchimedesBase):
     For all points on this spiral *r* must be >= :attr:`.r0`, *s* must be >= 0, 
     and *theta* must be <= :attr:`.t0`.
 
+    Parameters
+    ----------
+    b : float
+        Parameter in the polar equation. Must be > 0.
+    r0 : float
+        The spiral curve segment begins at (*r* = `r0`). Must be a
+        non-negative value.
     '''
     def __init__(self, b, r0):
         super().__init__(b, -1, r0)
@@ -275,6 +286,13 @@ class SpiralLituus(SpiralArchimedesBase):
     For all points on this spiral *r* must be >= :attr:`.r0`, *s* must be >= 0, 
     and *theta* must be <= :attr:`.t0`.
 
+    Parameters
+    ----------
+    b : float
+        Parameter in the polar equation. Must be > 0.
+    r0 : float
+        The spiral curve segment begins at (*r* = `r0`). Must be a
+        non-negative value.
     '''
     def __init__(self, b, r0):
         super().__init__(b, -1/2, r0)
