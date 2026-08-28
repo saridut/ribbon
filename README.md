@@ -4,14 +4,14 @@
 
 Ligand-coated semiconductor nanoplatelets (NPLs), also called nanoribbons, can
 adopt a wide variety of shapes in solution or when deposited from a solution
-onto a substrate. Following [Guillemeney _et al_ (2022)](http://doi.org
-/10.1038/s42004-021-00621-z), the most common shapes for CdSe-type NPLs are
+onto a substrate. Following [Guillemeney _et al_ (2022)](http://doi.org/10.1038/s42004-021-00621-z),
+the most common shapes for CdSe-type NPLs are
 cylinders, helices, and helicoids. More exotic shapes have been observed with
 other crystalline materials, e.g. double spiral-like shapes have been
 reported by [Guillemeney _et al_ (2024)](http://doi.org/10.1021/jacs.4c04905)
 for InS. While these shapes can be generated from molecular dynamics (MD)
-simulations, as has been done by [Monego _et al_ (2024)](http://doi.org/
-10.1073/pnas.2316299121), it is computationally very expensive for
+simulations, as has been done by [Monego _et al_ (2024)](http://doi.org/10.1073/pnas.2316299121),
+it is computationally very expensive for
 experimentally relevant NPL sizes. In addition, MD-generated shapes invariably
 contain fluctuations. While modeling shape-dependent NPL properties, e.g.
 scattering patterns, it is often very useful to rapidly generate a desired
