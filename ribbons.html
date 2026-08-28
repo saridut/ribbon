@@ -400,14 +400,16 @@ along the centerline (shown as the dark curve).</p>
 <a class="reference internal image-reference" href="_images/schem1.png"><img alt="_images/schem1.png" src="_images/schem1.png" style="width: 600px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">This is a schematic.</span><a class="headerlink" href="#fig-target" title="Link to this image">#</a></p>
+<p><span class="caption-text">Schematic of the ribbon midplane in the reference configuration (left) and the
+current configuration (right). The red, green, and blue arrows indicate the
+director vectors <span class="math notranslate nohighlight">\(\bm{d}_1\)</span>, <span class="math notranslate nohighlight">\(\bm{d}_2\)</span>, and <span class="math notranslate nohighlight">\(\bm{d}_3\)</span>, respectively.</span><a class="headerlink" href="#fig-target" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p>The centerline in the current configuration is constructed by following the
 evolution of the Darboux frame with respect to the arc length from <span class="math notranslate nohighlight">\(u = 0\)</span> to
 <span class="math notranslate nohighlight">\(u = L\)</span>. The frame evolution equations are as follows:</p>
-<div class="amsmath math notranslate nohighlight" id="equation-4b8fce17-9327-46f3-87cf-576e9ce5a1d3">
-<span class="eqno">(1)<a class="headerlink" href="#equation-4b8fce17-9327-46f3-87cf-576e9ce5a1d3" title="Permalink to this equation">#</a></span>\[\begin{align}
+<div class="amsmath math notranslate nohighlight" id="equation-2b58b451-08ab-456b-8653-ed7697e5fa0e">
+<span class="eqno">(1)<a class="headerlink" href="#equation-2b58b451-08ab-456b-8653-ed7697e5fa0e" title="Permalink to this equation">#</a></span>\[\begin{align}
 \frac{d}{du}\bm{d}_1 &amp;= m(u) \bm{d}_2 \\
 \frac{d}{du}\bm{d}_2 &amp;= -m(u)\bm{d}_1 - l(u) \bm{d}_3\\
 \frac{d}{du}\bm{d}_3 &amp;= l(u) \bm{d}_2
@@ -415,13 +417,13 @@ evolution of the Darboux frame with respect to the arc length from <span class="
 <p>These above three equations need to augmented with the following three
 equations to obtain the centerline coordinates <span class="math notranslate nohighlight">\(\bm{R}(u,0,0) = [X, Y,
 Z]^T\)</span> in the current configuration.</p>
-<div class="amsmath math notranslate nohighlight" id="equation-22896bfc-34ae-4244-9942-5b104c897c4f">
-<span class="eqno">(2)<a class="headerlink" href="#equation-22896bfc-34ae-4244-9942-5b104c897c4f" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-cfefb847-a18d-4f5d-873c-8fb914f60bf5">
+<span class="eqno">(2)<a class="headerlink" href="#equation-cfefb847-a18d-4f5d-873c-8fb914f60bf5" title="Permalink to this equation">#</a></span>\[\begin{equation}
 \frac{d}{du}\bm{R}(u,0,0) = \bm{d}_3
 \end{equation}\]</div>
 <p>Once the centerline is obtained, we can construct the midsurface using</p>
-<div class="amsmath math notranslate nohighlight" id="equation-c3fb0838-e982-4075-918d-01c6acf8682a">
-<span class="eqno">(3)<a class="headerlink" href="#equation-c3fb0838-e982-4075-918d-01c6acf8682a" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-5cca3c78-f4a6-4d1d-b30d-8edf0da47c6e">
+<span class="eqno">(3)<a class="headerlink" href="#equation-5cca3c78-f4a6-4d1d-b30d-8edf0da47c6e" title="Permalink to this equation">#</a></span>\[\begin{equation}
 \bm{R}(u,v,0) = \bm{R}(u,0,0) + v \bm{d}_1(u) - \frac{1}{2} v^2 n(u) \bm{d}_2(u)
 \end{equation}\]</div>
 <p>Note that the above equation is not an exact equality, rather it is the Taylor
@@ -438,8 +440,8 @@ only for circular cross-sections. However, in case of NPLs, the thickness is so
 small that we can ignore the effect of warping. In fact, we can completely
 ignore the thickness direction and simply deal with the midsurface. But if we
 retain the thickness, then the current coordinates</p>
-<div class="amsmath math notranslate nohighlight" id="equation-7e5fdfe0-e6a3-48cd-9d7f-75e0abee77f2">
-<span class="eqno">(4)<a class="headerlink" href="#equation-7e5fdfe0-e6a3-48cd-9d7f-75e0abee77f2" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-53cb63d2-1fb4-4a60-9761-6585c8a5b050">
+<span class="eqno">(4)<a class="headerlink" href="#equation-53cb63d2-1fb4-4a60-9761-6585c8a5b050" title="Permalink to this equation">#</a></span>\[\begin{equation}
 \bm{R}(u,v,w) = \bm{R}(u,v,0) 
     + w \frac{\bm{R}(u,v,0)_u \times \bm{R}(u,v,0)_v}
             {\lVert \bm{R}(u,v,0)_u \times \bm{R}(u,v,0)_v \rVert},
@@ -458,8 +460,8 @@ that the frame evolution equations are the same as that for a rigid body
 rotation, where the body rotates with an instantaneous angular velocity
 <span class="math notranslate nohighlight">\(\bs{\upomega} = [l, 0, -m]^T\)</span>. We will move to a <strong>quarternion</strong>
 representation of the frame, reducing the equations to</p>
-<div class="amsmath math notranslate nohighlight" id="equation-01417f5e-a7ad-456e-9db7-6a49101ddb78">
-<span class="eqno">(5)<a class="headerlink" href="#equation-01417f5e-a7ad-456e-9db7-6a49101ddb78" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-80db1187-3c84-4c0d-83e0-e63536b804cb">
+<span class="eqno">(5)<a class="headerlink" href="#equation-80db1187-3c84-4c0d-83e0-e63536b804cb" title="Permalink to this equation">#</a></span>\[\begin{equation}
 \dot{\bm{q}} = \frac{1}{2}\bs{\Omega} \bm{q},
 \end{equation}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\bs{\Omega}\)</span> is the anti-symmetric angular velocity matrix, <span class="math notranslate nohighlight">\(\bm{q}\)</span> is
@@ -468,16 +470,16 @@ respect to <span class="math notranslate nohighlight">\(u\)</span> (which acts l
 given in equation 7.7.27 in <em>Baruh (1999) Analytical Dynamics</em>. With initial
 condition <span class="math notranslate nohighlight">\(\bm{q}(0) = [1,0,0,0]^T\)</span> (corresponding to an identity matrix),
 the solution is simply a quaternion multiplication:</p>
-<div class="amsmath math notranslate nohighlight" id="equation-1ed73649-2fef-4dbe-95b8-b8aa4c4ebd07">
-<span class="eqno">(6)<a class="headerlink" href="#equation-1ed73649-2fef-4dbe-95b8-b8aa4c4ebd07" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-c39ddf17-46fa-43ce-b117-2ea336453db0">
+<span class="eqno">(6)<a class="headerlink" href="#equation-c39ddf17-46fa-43ce-b117-2ea336453db0" title="Permalink to this equation">#</a></span>\[\begin{equation}
 \bm{q} = \Big [\cos \frac{\omag u}{2} 
             + \frac{\bs{\upomega}}{\omag} \sin \frac{\omag u}{2} \Big] \bm{q}(0)
 \end{equation}\]</div>
 <p>The director vectors <span class="math notranslate nohighlight">\(\bm{d}_i\)</span> can be obtained from <span class="math notranslate nohighlight">\(\bm{q}\)</span> by using the
 the following transformation equations from quaternion to a direction cosine
 matrix:</p>
-<div class="amsmath math notranslate nohighlight" id="equation-802ef30e-9a9a-4625-8e14-c6b78c1623b1">
-<span class="eqno">(7)<a class="headerlink" href="#equation-802ef30e-9a9a-4625-8e14-c6b78c1623b1" title="Permalink to this equation">#</a></span>\[\begin{align}
+<div class="amsmath math notranslate nohighlight" id="equation-5f741d66-4847-4a9e-8ac5-247ebaf83288">
+<span class="eqno">(7)<a class="headerlink" href="#equation-5f741d66-4847-4a9e-8ac5-247ebaf83288" title="Permalink to this equation">#</a></span>\[\begin{align}
 \bm{d}_1 &amp;= \left[ 
                 2\left(q_0^2 + q_1^2\right) - 1 ,
                 2\left(q_1 q_2 + q_0 q_3 \right),
@@ -495,8 +497,8 @@ matrix:</p>
              \right]
 \end{align}\]</div>
 <p>where</p>
-<div class="amsmath math notranslate nohighlight" id="equation-e7153b22-451a-400e-80ee-9c52db09c181">
-<span class="eqno">(8)<a class="headerlink" href="#equation-e7153b22-451a-400e-80ee-9c52db09c181" title="Permalink to this equation">#</a></span>\[\begin{align}
+<div class="amsmath math notranslate nohighlight" id="equation-24f8a8ba-e895-4507-8ee5-b10ef7416890">
+<span class="eqno">(8)<a class="headerlink" href="#equation-24f8a8ba-e895-4507-8ee5-b10ef7416890" title="Permalink to this equation">#</a></span>\[\begin{align}
 q_0 &amp;= \cos \left(\frac{\omag u}{2} \right) \\
 q_1 &amp;= -\frac{\upomega_1}{\omag}\sin \left(\frac{\omag u}{2} \right) \\
 q_2 &amp;= -\frac{\upomega_2}{\omag}\sin \left(\frac{\omag u}{2} \right) \\
@@ -505,8 +507,8 @@ q_3 &amp;= -\frac{\upomega_3}{\omag}\sin \left(\frac{\omag u}{2} \right).
 <p>After substitution and rearrangement, and recalling that <span class="math notranslate nohighlight">\(\upomega_2 = 0\)</span>, we
 have the analytical equations for the Darboux frame
 vectors:</p>
-<div class="amsmath math notranslate nohighlight" id="equation-0c7da636-ed92-42df-bff0-220a3ca7f986">
-<span class="eqno">(9)<a class="headerlink" href="#equation-0c7da636-ed92-42df-bff0-220a3ca7f986" title="Permalink to this equation">#</a></span>\[\begin{align}
+<div class="amsmath math notranslate nohighlight" id="equation-fbb45fb2-6593-4d5a-8f1e-6b95c80c45e0">
+<span class="eqno">(9)<a class="headerlink" href="#equation-fbb45fb2-6593-4d5a-8f1e-6b95c80c45e0" title="Permalink to this equation">#</a></span>\[\begin{align}
 \bm{d}_1 &amp;= 
     \Bigg[
         \frac{\upomega_1^2}{\omag^2} \Big (1 - \cos \omag u \Big) + \cos \omag u,
@@ -529,8 +531,8 @@ vectors:</p>
 <p>Next we integrate the tangent vector <span class="math notranslate nohighlight">\(\bm{d}_3\)</span> with initial condition
 <span class="math notranslate nohighlight">\(\bm{R}(u,0,0) = [0, 0, 0]\)</span> at <span class="math notranslate nohighlight">\(u = 0\)</span> to obtain the centerline coordinates in
 analytical form:</p>
-<div class="amsmath math notranslate nohighlight" id="equation-9485963c-5638-40be-a92b-c46e9a5bee5c">
-<span class="eqno">(10)<a class="headerlink" href="#equation-9485963c-5638-40be-a92b-c46e9a5bee5c" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-7e6b0194-98f0-49b6-9a70-174f696a8987">
+<span class="eqno">(10)<a class="headerlink" href="#equation-7e6b0194-98f0-49b6-9a70-174f696a8987" title="Permalink to this equation">#</a></span>\[\begin{equation}
 \bm{R}(u,0,0) = 
     \Bigg[ 
         \frac{\upomega_1\upomega_3}{\omag^2} 
@@ -591,8 +593,8 @@ SciPy as opposed to the newer <a class="reference external" href="https://docs.s
 <p>These are the expressions for radius(<span class="math notranslate nohighlight">\(R\)</span>), pitch (<span class="math notranslate nohighlight">\(P\)</span>), and the angle between
 the principal curvature directions at the centerline and the ribbon length
 direction (<span class="math notranslate nohighlight">\(\theta\)</span>):</p>
-<div class="amsmath math notranslate nohighlight" id="equation-bba5b2cc-f72c-4325-b4b4-ceb3aad0deda">
-<span class="eqno">(11)<a class="headerlink" href="#equation-bba5b2cc-f72c-4325-b4b4-ceb3aad0deda" title="Permalink to this equation">#</a></span>\[\begin{align}
+<div class="amsmath math notranslate nohighlight" id="equation-6da08b6e-51a9-4a6d-a7bc-379dbae61a2b">
+<span class="eqno">(11)<a class="headerlink" href="#equation-6da08b6e-51a9-4a6d-a7bc-379dbae61a2b" title="Permalink to this equation">#</a></span>\[\begin{align}
 R(u) &amp;= \frac{l(u)}{l^2(u)+m^2(u)}\\
 P(u) &amp;= \frac{m(u)}{l^2(u)+m^2(u)}\\
 \theta &amp;= \frac{1}{2}\tan^{-1} \left\{ \frac{2*m(u)}{l(u)-m(u)} \right\}
