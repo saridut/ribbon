@@ -27,13 +27,6 @@ dependencies = [
 repository = "https://github.com/saridut/ribbon.git"
 #download = 
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["ribbon*"]
-exclude = ["./test*", "./docs*"]
-namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
-
-
 [tool.setuptools.dynamic]
 version = {attr = "ribbon.__version__"} 
 
