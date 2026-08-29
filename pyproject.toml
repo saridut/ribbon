@@ -20,7 +20,7 @@ requires-python = ">=3.11"
 dependencies = [
     "numpy >= 2.0.0",
     "scipy >= 1.18.0",
-    "rotlib @ git+https://github.com/saridut/rotlib.git/#subdirectory=python",
+  #  "rotlib @ git+https://github.com/saridut/rotlib.git/#subdirectory=python",
     ]
 
 [project.urls]
