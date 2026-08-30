@@ -177,11 +177,18 @@ class Ribbon(object):
 
         """
         self.atom_refpos = np.asarray(atom_refpos, dtype=np.float64, copy=copy)
-        self.atom_pos = np.zeros_like(self.atom_refpos)
-        self._ap_ms = np.zeros_like(self.atom_pos)
-        self._ap_du = np.zeros_like(self.atom_pos)
-        self._ap_dv = np.zeros_like(self.atom_pos)
-        self._ap_normals = np.zeros_like(self.atom_pos)
+        if self.atom_refpos.shape == self.atom_pos.shape:
+            self.atom_pos[...] = 0.0
+            self._ap_ms[...] = 0.0
+            self._ap_du[...] = 0.0
+            self._ap_dv[...] = 0.0
+            self._ap_normals[...] = 0.0
+        else:
+            self.atom_pos = np.zeros_like(self.atom_refpos)
+            self._ap_ms = np.zeros_like(self.atom_pos)
+            self._ap_du = np.zeros_like(self.atom_pos)
+            self._ap_dv = np.zeros_like(self.atom_pos)
+            self._ap_normals = np.zeros_like(self.atom_pos)
 
     def set_curvatures(self, l, m, n, radius=None, pitch=None):
         """
