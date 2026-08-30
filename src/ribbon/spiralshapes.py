@@ -126,7 +126,7 @@ def double_spiral(spiral, L, ds=0.5, same=False, end=1, f=0.0):
         Spacing along the arclength.
     same : bool
         Whether the spirals are on the same side or not.
-    end : {0, 1}
+    end : 0 | 1
         If 0, the ``s=0`` end. If 1, the ``s=L`` end.
     f : float
         Fraction of the arclength `L` over which the curvature will be

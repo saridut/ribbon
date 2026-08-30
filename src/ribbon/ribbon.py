@@ -21,12 +21,6 @@ class Ribbon(object):
     thickness : float
         Thickness of the ribbon. If zero, the ribbon is a 2D surface in
         3-space.
-    dl : float
-        Grid spacing in the length direction.
-    dw : float
-        Grid spacing in the width direction.
-    dt : float
-        Grid spacing in the thickness direction. Ignored if `thickness = 0`.
     l, m, n : float or callable
         Curvature along length, width, and thickness directions, respectively.
         If any of the curvatures is callable, it should be of the form *y = f
@@ -57,15 +51,29 @@ class Ribbon(object):
     thickness : float
         Thickness of the ribbon. If zero, the ribbon is a 2D surface in
         3-space.
-    dl : float
-        Grid spacing in the length direction.
-    dw : float
-        Grid spacing in the width direction.
-    dt : float
+    gspl : float | None
+        Grid spacing in the length direction. If `None`, specify the number of
+        grid points using the keyword argument `ngpl`.
+    gspw : float | None
+        Grid spacing in the width direction. If `None`, specify the number of
+        grid points using the keyword argument `ngpw`.
+    gspt : float | None
         Grid spacing in the thickness direction. Ignored if `thickness = 0`.
+        If `thickness != 0` and `gspt = None`, specify the number of grid points
+        using the keyword argument `ngpt`.
+    ngpl : int | None, optional
+        Number of grid points in the length direction. Must be > 4. Used only
+        if `gspl = None`.
+    ngpw : int | None, optional
+        Number of grid points in the width direction. Must be > 4. Used only if
+        `gspw = None`.
+    ngpt : int | None, optional
+        Number of grid points in the thickness direction. Must be > 2. Used
+        only if `thickness != 0` and `gspt = None`.
 
     """
-    def __init__(self, length, width, thickness, dl, dw, dt):
+    def __init__(self, length, width, thickness, gspl, gspw, gspt,
+                 ngpl=None, ngpw=None, ngpt=None):
         if not ( isinstance(length, RealNumber) and length > 0 ):
             raise ValueError( f"`length`(= {length:g}) must be an instance of"
                 " numbers.Real or numpy.number and must be > 0.")
@@ -84,27 +92,48 @@ class Ribbon(object):
         else:
             self.thickness = thickness
 
-        nu = math.ceil(self.length/dl) + 1
-        if nu < 4:
+        if gspl is not None:
+            n = math.ceil(self.length/gspl) + 1
+        elif ngpl is not None:
+            n = ngpl
+        else:
+            raise ValueError("`gspl` and `ngpl` cannot both be None.") 
+        if n < 4:
             raise ValueError(
-                f"{nu} grid points along the length direction. Must be > 4."
-                " Reduce grid spacing.")
-        self.u = np.linspace(0, self.length, nu, dtype=np.float64)
+                f"Number of grid points (= {n}) along the length direction"
+                f" must be >= 4. Reduce grid spacing or increase number of"
+                f" grid points."
+                )
+        self.u = np.linspace(0, self.length, n, dtype=np.float64)
 
-        nv = math.ceil(self.width/dw) + 1
-        if nv < 4:
+        if gspw is not None:
+            n = math.ceil(self.width/gspw) + 1
+        elif ngpw is not None:
+            n = ngpw
+        else:
+            raise ValueError("`gspw` and `ngpw` cannot both be None.") 
+        if n < 4:
             raise ValueError(
-                f"{nv} grid points along the width direction. Must be > 4."
-                " Reduce grid spacing.")
-        self.v = np.linspace(-self.width/2, self.width/2, nu, dtype=np.float64)
+                f"Number of grid points (= {n}) along the width direction"
+                f" must be >= 4. Reduce grid spacing or increase number of"
+                f" grid points."
+                )
+        self.v = np.linspace(-self.width/2, self.width/2, n, dtype=np.float64)
 
         if self.thickness > 0:
-            nw = math.ceil(self.thickness/dt) + 1
-            if nw < 2:
+            if gspt is not None:
+                n = math.ceil(self.thickness/gspt) + 1
+            elif ngpt is not None:
+                n = ngpt
+            else:
+                raise ValueError("`gspt` and `ngpt` cannot both be None.") 
+            if n < 2:
                 raise ValueError(
-                    f"{nw} grid points along the thickness direction."
-                    " Must be > 2. Reduce grid spacing.")
-            self.w = np.linspace(-self.thickness/2, self.thickness/2, nw,
+                    f"Number of grid points (= {n}) along the thickness"
+                    f" direction must be >= 2. Reduce grid spacing or increase"
+                    f" number of grid points."
+                    )
+            self.w = np.linspace(-self.thickness/2, self.thickness/2, n,
                                  dtype=np.float64)
 
         self.mline = np.zeros((self.u.size, 3))
@@ -152,36 +181,64 @@ class Ribbon(object):
         self._ap_dv = np.zeros_like(self.atom_pos)
         self._ap_normals = np.zeros_like(self.atom_pos)
 
-    def set_curvatures(self, l, m, n):
+    def set_curvatures(self, l, m, n, radius=None, pitch=None):
         """
         Setter for the curvatures along the three directions.
 
         If any of the curvatures is callable, it should be of the form *y = f
         (x)*, where *x* (float) is the arclength coordinate and *y* (float) is
-        the curvature.
+        the curvature (or radius and pitch).
 
         Parameters
         ----------
-        l : float or callable
-            Curvature along the length direction 
-        m : float or callable
+        l : None | float | callable
+            Curvature along the length direction. If `None`, `m` should also be
+            `None` and `radius` and `pitch` must be specified.
+        m : None | float | callable
+            Twist along the length direction. If `None`, `l` should also be
+            `None` and `radius` and `pitch` must be specified.
+        n : float | callable
             Curvature along the width direction 
-        n : float or callable
-            Curvature along the thickness direction 
+        radius : None | float
+            Radius of curvature of the ribbon. If `None`, `pitch` should also
+            be `None` and `l` and `m` must be specified.
+        pitch : None | float
+            Pitch of the ribbon. If `None`, `radius` should also be `None` and
+            `l` and `m` must be specified.
 
         Returns
         -------
         None
         """
-        if not (isinstance(l, RealNumber) or callable(l) ):
-            raise ValueError(f"`l`(= {l}) must be a float or callable.")
+        if (l is not None) and (m is not None):
+            if not (isinstance(l, RealNumber) or callable(l) ):
+                raise ValueError(f"`l`(= {l}) must be a float or callable.")
+            else:
+                self.l = l
+            if not (isinstance(m, RealNumber) or callable(m) ):
+                raise ValueError(f"`m`(= {m}) must be a float or callable.")
+            else:
+                self.m = m
+        elif (l is None) and (m is None) and (radius is not None) and \
+                (pitch is not None):
+            if not isinstance(radius, RealNumber):
+                raise ValueError(f"`radius`(= {radius}) must be float.")
+            if not isinstance(pitch, RealNumber):
+                raise ValueError(f"`pitch`(= {pitch}) must be a float.")
+            if np.isposinf(radius) or np.isposinf(pitch):
+                self.l = 0.0; self.m = 0.0
+            else:
+                fpi2 = 4*np.pi**2
+                den = fpi2*radius**2 + pitch**2
+                self.l = fpi2*radius/den
+                self.m = 2*np.pi*pitch/den
         else:
-            self.l = l
-
-        if not (isinstance(m, RealNumber) or callable(m) ):
-            raise ValueError(f"`m`(= {m}) must be a float or callable.")
-        else:
-            self.m = m
+            raise ValueError(
+                    f"Valid cases are (1) `l` and `m` are not None, or (2) `l`"
+                    f" and `m` are None and `radius` and `pitch` are not None."
+                    f" Input given: `l`(= {l}), `m`(= {m}),"
+                    f" `radius`(= {radius}), and `pitch`(= {pitch})."
+                    )
 
         if not (isinstance(n, RealNumber) or callable(n) ):
             raise ValueError(f"`n`(= {n}) must be a float or callable.")
