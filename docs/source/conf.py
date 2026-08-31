@@ -89,9 +89,19 @@ html_css_files = ["custom.css"]
 # SmartyPants will be used to convert quotes and dashes to typographically
 # correct entities.
 html_use_smartypants = True
+
 html_theme_options = {
-    "primary_sidebar_end": ["indices.html"]
+    "primary_sidebar_end": ["indices.html"],
+    "icon_links": [
+        {
+            # Label for this link
+            "name": "GitHub",
+            # URL where the link will redirect
+            "url": "https://github.com/saridut/ribbon",  # required
+            # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
+            "icon": "fa-brands fa-github",
+            # The type of image to be used (see below for details)
+            "type": "fontawesome",
+        }
+   ],
 }
-#html_theme_options = {
-#    "use_edit_page_button": True,
-#}
