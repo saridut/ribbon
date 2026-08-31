@@ -158,7 +158,7 @@ class Ribbon(object):
         self._ap_dv = np.zeros_like(self.atom_pos)
         self._ap_normals = np.zeros_like(self.atom_pos)
 
-    def set_atom_refpos(self, atom_refpos, copy=True):
+    def set_atom_refpos(self, atom_refpos, copy=True, atom_pos=None):
         """
         Setter for the reference positions of atoms.
 
@@ -169,7 +169,10 @@ class Ribbon(object):
             [0, :attr:`.length`] x [-:attr:`.width`/2, :attr:`.width`/2] 
             x [-:attr:`.thickness`/2, :attr:`.thickness`/2].
         copy : bool
-            Whether to make a copy of the input array.
+            Whether to make a copy of the input array `atom_refpos`.
+        atom_pos : (n,3) ndarray
+            External buffer for :attr:`.atom_pos`. If `None`, an array will be
+            created.
 
         Returns
         -------
@@ -184,7 +187,11 @@ class Ribbon(object):
             self._ap_dv[...] = 0.0
             self._ap_normals[...] = 0.0
         else:
-            self.atom_pos = np.zeros_like(self.atom_refpos)
+            if atom_pos is None:
+                self.atom_pos = np.zeros_like(self.atom_refpos)
+            else:
+                self.atom_pos = atom_pos
+                self.atom_pos[...] = 0.0
             self._ap_ms = np.zeros_like(self.atom_pos)
             self._ap_du = np.zeros_like(self.atom_pos)
             self._ap_dv = np.zeros_like(self.atom_pos)
