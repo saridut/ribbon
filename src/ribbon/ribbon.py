@@ -458,6 +458,17 @@ class Ribbon(object):
         elif self.meth == 'ode':
             self._create_ode(orient_along)
 
+    def translate_to_center(self):
+        """
+        Center is the center of the ribbon midline. This will modify current
+        atom positions and all grids.
+
+        """
+        center = self.mline.mean(axis=0)
+        self.mline -= center
+        self.msurf -= center
+        self.grid -= center
+        self.atom_pos -= center
 
     def _create_direct_zero(self):
         #Create the midline
