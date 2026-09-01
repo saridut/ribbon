@@ -2,7 +2,6 @@ ribbon package
 ==============
 
 .. automodule:: ribbon
-   :inherited-members:
    :members:
    :show-inheritance:
    :undoc-members:

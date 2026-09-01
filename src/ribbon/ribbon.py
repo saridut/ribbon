@@ -197,7 +197,84 @@ class Ribbon(object):
             self._ap_dv = np.zeros_like(self.atom_pos)
             self._ap_normals = np.zeros_like(self.atom_pos)
 
-    def set_curvatures(self, l, m, n, radius=None, pitch=None):
+    def set_shape(self, shape, **params):
+        """
+        Setter for the ribbon shape.
+
+        Parameters
+        ----------
+        shape : str
+            Name of the shape. Must be ``'Helicoid'`` | ``'HelicalRibbon'`` |
+            ``'Cylinder'`` | ``'Planar'`` | ``'General'``
+        params : dict
+            Shape parameters for each `shape` as key-value pairs.
+
+            Helicoid
+                * `'isRightHanded'`. *bool*.
+                * `'pitch'`. *float*. Must be > 0.
+            HelicalRibbon
+                * `'isRightHanded'`. *bool*.
+                * `'pitch'`. *float*. Must be > 0.
+                * `'radius'`. *float*. Must be > 0.
+            Cylinder     
+                * `'isRightHanded'`. *bool*.
+                * `'radius'`. *float*. Must be > 0.
+            Planar       
+                No parameters required.
+            General      
+                * `'l'`. *float | callable*. Curvature along the length.
+                * `'m'`. *float | callable*. Twist along the length.
+                * `'n'`. *float | callable*. Curvature along the width.
+
+        Returns
+        -------
+        None
+        """
+        shape_names = ['Helicoid', 'HelicalRibbon', 'Cylinder', 'Planar',
+        'General']
+        if shape not in shape_names:
+            raise ValueError(f"`shape`(= {shape}) must be one of"
+                             f" {', '.join(x for x in shape_names)}."
+                             )
+        if shape == 'Helicoid':
+            irh = params['isRightHanded']
+            pitch = params['pitch']
+            if not isinstance(pitch, RealNumber) or pitch <= 0.0:
+                raise ValueError(f"`pitch`(= {pitch}) must be a postive float.")
+            l = 0.0
+            m = 2*np.pi/pitch
+            if not irh: m = -m # fmt: skip
+            n = 0.0
+        elif shape == 'HelicalRibbon':
+            irh = params['isRightHanded']
+            radius = params['radius']
+            if not isinstance(radius, RealNumber) or radius <= 0.0:
+                raise ValueError(f"`radius`(= {radius}) must be a postive float.")
+            pitch = params['pitch']
+            den = 4*np.pi**2*radius**2 + pitch**2
+            l = 4*np.pi**2 * radius / den # fmt: skip
+            m = 2*np.pi * pitch / den     # fmt: skip
+            if not irh: m = -m            # fmt: skip
+            n = m**2/l
+        elif shape == 'Cylinder':
+            irh = params['isRightHanded']
+            radius = params['radius']
+            if not isinstance(radius, RealNumber) or radius <= 0.0:
+                raise ValueError(f"`radius`(= {radius}) must be a positive float.")
+            l = 1.0/radius
+            if not irh: l = -l  # fmt: skip
+            m = 0.0
+            n = 0.0
+        elif shape == 'Planar':
+            l = 0.0; m = 0.0; n = 0.0
+        elif shape == 'General':
+            l = params['l']
+            m = params['m']
+            n = params['n']
+        self.set_curvatures(l, m, n)
+
+
+    def set_curvatures(self, l, m, n):
         """
         Setter for the curvatures along the three directions.
 
@@ -207,55 +284,25 @@ class Ribbon(object):
 
         Parameters
         ----------
-        l : None | float | callable
-            Curvature along the length direction. If `None`, `m` should also be
-            `None` and `radius` and `pitch` must be specified.
-        m : None | float | callable
-            Twist along the length direction. If `None`, `l` should also be
-            `None` and `radius` and `pitch` must be specified.
+        l : float | callable
+            Curvature along the length direction.
+        m : float | callable
+            Twist along the length direction.
         n : float | callable
-            Curvature along the width direction 
-        radius : None | float
-            Radius of curvature of the ribbon. If `None`, `pitch` should also
-            be `None` and `l` and `m` must be specified.
-        pitch : None | float
-            Pitch of the ribbon. If `None`, `radius` should also be `None` and
-            `l` and `m` must be specified.
+            Curvature along the width direction.
 
         Returns
         -------
         None
         """
-        if (l is not None) and (m is not None):
-            if not (isinstance(l, RealNumber) or callable(l) ):
-                raise ValueError(f"`l`(= {l}) must be a float or callable.")
-            else:
-                self.l = l
-            if not (isinstance(m, RealNumber) or callable(m) ):
-                raise ValueError(f"`m`(= {m}) must be a float or callable.")
-            else:
-                self.m = m
-        elif (l is None) and (m is None) and (radius is not None) and \
-                (pitch is not None):
-            if not isinstance(radius, RealNumber):
-                raise ValueError(f"`radius`(= {radius}) must be float.")
-            if not isinstance(pitch, RealNumber):
-                raise ValueError(f"`pitch`(= {pitch}) must be a float.")
-            if np.isposinf(radius) or np.isposinf(pitch):
-                self.l = 0.0; self.m = 0.0
-            else:
-                fpi2 = 4*np.pi**2
-                den = fpi2*radius**2 + pitch**2
-                self.l = fpi2*radius/den
-                self.m = 2*np.pi*pitch/den
+        if not (isinstance(l, RealNumber) or callable(l) ):
+            raise ValueError(f"`l`(= {l}) must be a float or callable.")
         else:
-            raise ValueError(
-                    f"Valid cases are (1) `l` and `m` are not None, or (2) `l`"
-                    f" and `m` are None and `radius` and `pitch` are not None."
-                    f" Input given: `l`(= {l}), `m`(= {m}),"
-                    f" `radius`(= {radius}), and `pitch`(= {pitch})."
-                    )
-
+            self.l = l
+        if not (isinstance(m, RealNumber) or callable(m) ):
+            raise ValueError(f"`m`(= {m}) must be a float or callable.")
+        else:
+            self.m = m
         if not (isinstance(n, RealNumber) or callable(n) ):
             raise ValueError(f"`n`(= {n}) must be a float or callable.")
         else:
@@ -467,8 +514,12 @@ class Ribbon(object):
 
     def translate_to_center(self):
         """
-        Center is the center of the ribbon midline. This will modify current
-        atom positions and all grids.
+        Translates grids and current atom positions so as to bring the center
+        of the ribbon midline at (0,0,0).
+
+        Returns
+        -------
+        None
 
         """
         center = self.mline.mean(axis=0)
