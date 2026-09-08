@@ -40,15 +40,17 @@ def test_init_error(init_args):
     assert info.type is ValueError
 
 
-def test_radius_pitch():
-    l = 0.4; m = 0.4; n = 0.4
-    ribbon = Ribbon(20, 4, 0, 0.1, 0.1, 0)
-    ribbon.set_curvatures(l, m, n)
-    radius = ribbon.get_radius()
-    pitch = ribbon.get_pitch()
-    ribbon.set_curvatures(None, None, n, radius=radius, pitch=pitch)
-    assert np.isclose(ribbon.l, l, 1e-8, 1e-14)
-    assert np.isclose(ribbon.m, m, 1e-8, 1e-14)
+#TODO: Add new updated test here since set_curvatures has been replaced by 
+#set_shape.
+#def test_radius_pitch():
+#    l = 0.4; m = 0.4; n = 0.4
+#    ribbon = Ribbon(20, 4, 0, 0.1, 0.1, 0)
+#    ribbon.set_curvatures(l, m, n)
+#    radius = ribbon.get_radius()
+#    pitch = ribbon.get_pitch()
+#    ribbon.set_curvatures(None, None, n, radius=radius, pitch=pitch)
+#    assert np.isclose(ribbon.l, l, 1e-8, 1e-14)
+#    assert np.isclose(ribbon.m, m, 1e-8, 1e-14)
 
 
 
