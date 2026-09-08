@@ -86,23 +86,16 @@ of this repo.
 
 ## Examples
 
-### A ribbon with a helical centerline
+### A helical ribbon
 
 ```python
 import numpy as np
 from ribbon import Ribbon, write_xyz
 import matplotlib.pyplot as plt
 
-length = 20.0 # Length of the ribbon
+length = 36.0 # Length of the ribbon
 width = 4.0 # Width of the ribbon
 thickness = 0.0 # Set ribbon thickness to zero for a single atomic layer
-
-# Curvature along length
-l = 0.4 
-# Twist. Positive to right handed, negative for left.
-m = 0.4
-# Curvature along width
-n = 0.4
 
 #Set some atoms in the reference configuration. For more realistic cases
 #this could be chosen from an appropriate lattice.
@@ -118,12 +111,14 @@ dl = 0.1
 dw = 0.1
 #Mesh size along thickness
 dt = 0.0 # No thickness
+radius = 1.5 #Radius of the helical ribbon
+pitch = 10 #Pitch of the helical ribbon
 
 #Create the ribbon.
 ribbon = Ribbon(length, width, thickness, dl, dw, dt)
 ribbon.set_atom_refpos(atom_coords)
-ribbon.set_curvatures(l, m, n)
-ribbon.create(orient_along=[0,0,1]) #Orient helix axis along z.
+ribbon.set_shape('HelicalRibbon', radius=radius, pitch=pitch)
+ribbon.create(orient_along=[1,0,0]) #Orient helix axis along z.
 
 #The (n,3) ndarray ribbon.atom_pos contains the atom positions of
 #the helical ribbon.
@@ -133,10 +128,10 @@ write_xyz(ribbon.atom_pos[:,0], ribbon.atom_pos[:,1], ribbon.atom_pos[:,2],
 
 #Geometrical properties: Radius, pitch, etc. Below, theta is the angle between
 #the principal curvature direction and the length direction of the ribbon.
-print(f"radius = {ribbon.get_radius()}\n"
-      f"pitch = {ribbon.get_pitch()}\n"
-      f"gauss curvature = {ribbon.get_gauss_curvature()}\n"
-      f"mean curvature = {ribbon.get_mean_curvature()}\n"
+print(f"R = {ribbon.get_radius()}\n"
+      f"P = {ribbon.get_pitch()}\n"
+      f"kg = {ribbon.get_gauss_curvature()}\n"
+      f"km = {ribbon.get_mean_curvature()}\n"
       f"theta = {ribbon.get_theta()}")
 
 #Plotting the midline and the midsurface as a wireframe
@@ -146,9 +141,16 @@ figh, axh = plt.subplots(nrows=1, ncols=1, figsize=(12,9),
                 )
 axh.plot(ribbon.mline[:,0], ribbon.mline[:,1], ribbon.mline[:,2], '-k', lw=1.2)
 axh.plot(ribbon.mline[0,0], ribbon.mline[0,1], ribbon.mline[0,2], 'or')
+
+axh.plot(ribbon.msurf[0,:,0], ribbon.msurf[0,:,1], ribbon.msurf[0,:,2], '-g', lw=1.0)
+axh.plot(ribbon.msurf[-1,:,0], ribbon.msurf[-1,:,1], ribbon.msurf[-1,:,2], '-g', lw=1.0)
+axh.plot(ribbon.msurf[:,0,0], ribbon.msurf[:,0,1], ribbon.msurf[:,0,2], '-r', lw=1.0)
+axh.plot(ribbon.msurf[:,-1,0], ribbon.msurf[:,-1,1], ribbon.msurf[:,-1,2], '-r', lw=1.0)
+
 axh.plot_wireframe(ribbon.msurf[:,:,0], ribbon.msurf[:,:,1],
             ribbon.msurf[:,:,2], linestyles='-', linewidths=0.5,
             rstride=2, cstride=8, color='0.5')
+
 axh.set_aspect('equal', 'box')
 axh.set_axis_off()
 plt.show()
@@ -158,10 +160,10 @@ plt.show()
 Executing the above code gives
 
 ```bash
-radius = 1.2499999999999998
-pitch = 7.853981633974481
-gauss curvature = 0.0
-mean curvature = 0.4
+R = 1.2499999999999998
+P = 7.853981633974481
+kg = 0.0
+km = 0.4
 theta = 0.7853981633974483
 ```
 

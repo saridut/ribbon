@@ -34,13 +34,13 @@ thickness = 0.0
 
 ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.0)
 #ribbon.set_atom_refpos(np.asarray(atom_coords))
-#ribbon.set_shape('HelicalRibbon', radius=1.5, pitch=10)
+ribbon.set_shape('HelicalRibbon', radius=1.5, pitch=10)
 #ribbon.set_shape('Helicoid', pitch=16)
 #ribbon.set_shape('Cylinder', radius=2)
 #ribbon.set_shape('Torus', Radius=10 , radius=1)
 #ribbon.set_shape('Plane')
-ribbon.set_shape('General', radius=2.5, pitch=10,
-                   profile='Circle', profile_params={'radius': 20.0})
+#ribbon.set_shape('General', radius=2.5, pitch=10,
+#                   profile='Circle', profile_params={'radius': 20.0})
 #ribbon.set_shape('General', radius=1.2, pitch=6, profile='Line')
 #ribbon.set_shape('General', radius=1, pitch=6,
 #                 profile='Helix', profile_params={'radius': 1.0, 'pitch': -6})
@@ -67,17 +67,17 @@ ribbon.create(orient_along=[1,0,0])
 #        print(f"{x:g}  {y:g}") 
 #else:
 #    print(f"R = {out}")
-#print(f"R = {ribbon.get_radius()}\n"
-#      f"P = {ribbon.get_pitch()}\n"
-#      f"kg = {ribbon.get_gauss_curvature()}\n"
-#      f"km = {ribbon.get_mean_curvature()}\n"
-#      f"theta = {ribbon.get_theta()}")
+print(f"R = {ribbon.get_radius()}\n"
+      f"P = {ribbon.get_pitch()}\n"
+      f"kg = {ribbon.get_gauss_curvature()}\n"
+      f"km = {ribbon.get_mean_curvature()}\n"
+      f"theta = {ribbon.get_theta()}")
 
 #write_xyz(ribbon.atom_pos[:,0], ribbon.atom_pos[:,1], ribbon.atom_pos[:,2]) 
 
 #raise SystemExit()
 figh, axh = plt.subplots(nrows=1, ncols=1, figsize=(12,9),
-                subplot_kw={'projection':'3d', 'proj_type': 'ortho'}
+                subplot_kw={'projection':'3d', 'proj_type': 'persp'}
                 )
 
 axh.plot(ribbon.mline[:,0], ribbon.mline[:,1], ribbon.mline[:,2], '-k', lw=1.2)
