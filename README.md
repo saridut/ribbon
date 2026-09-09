@@ -94,7 +94,7 @@ from ribbon import Ribbon, write_xyz
 import matplotlib.pyplot as plt
 
 length = 36.0 # Length of the ribbon
-width = 4.0 # Width of the ribbon
+width = 5.0 # Width of the ribbon
 thickness = 0.0 # Set ribbon thickness to zero for a single atomic layer
 
 #Set some atoms in the reference configuration. For more realistic cases
@@ -111,14 +111,14 @@ dl = 0.1
 dw = 0.1
 #Mesh size along thickness
 dt = 0.0 # No thickness
-radius = 1.5 #Radius of the helical ribbon
+radius = 2.0 #Radius of the helical ribbon
 pitch = 10 #Pitch of the helical ribbon
 
 #Create the ribbon.
 ribbon = Ribbon(length, width, thickness, dl, dw, dt)
 ribbon.set_atom_refpos(atom_coords)
 ribbon.set_shape('HelicalRibbon', radius=radius, pitch=pitch)
-ribbon.create(orient_along=[1,0,0]) #Orient helix axis along z.
+ribbon.create(orient_along=[0,0,1]) #Orient helix axis along z.
 
 #The (n,3) ndarray ribbon.atom_pos contains the atom positions of
 #the helical ribbon.
@@ -128,11 +128,11 @@ write_xyz(ribbon.atom_pos[:,0], ribbon.atom_pos[:,1], ribbon.atom_pos[:,2],
 
 #Geometrical properties: Radius, pitch, etc. Below, theta is the angle between
 #the principal curvature direction and the length direction of the ribbon.
-print(f"R = {ribbon.get_radius()}\n"
-      f"P = {ribbon.get_pitch()}\n"
-      f"kg = {ribbon.get_gauss_curvature()}\n"
-      f"km = {ribbon.get_mean_curvature()}\n"
-      f"theta = {ribbon.get_theta()}")
+print(f"R = {ribbon.get_radius():g}\n"
+      f"P = {ribbon.get_pitch():g}\n"
+      f"kg = {ribbon.get_gauss_curvature():g}\n"
+      f"km = {ribbon.get_mean_curvature():g}\n"
+      f"theta = {ribbon.get_theta():g}")
 
 #Plotting the midline and the midsurface as a wireframe
 
@@ -140,7 +140,7 @@ figh, axh = plt.subplots(nrows=1, ncols=1, figsize=(12,9),
                 subplot_kw={'projection':'3d', 'proj_type': 'persp'}
                 )
 axh.plot(ribbon.mline[:,0], ribbon.mline[:,1], ribbon.mline[:,2], '-k', lw=1.2)
-axh.plot(ribbon.mline[0,0], ribbon.mline[0,1], ribbon.mline[0,2], 'or')
+axh.plot(ribbon.mline[0,0], ribbon.mline[0,1], ribbon.mline[0,2], 'ob')
 
 axh.plot(ribbon.msurf[0,:,0], ribbon.msurf[0,:,1], ribbon.msurf[0,:,2], '-g', lw=1.0)
 axh.plot(ribbon.msurf[-1,:,0], ribbon.msurf[-1,:,1], ribbon.msurf[-1,:,2], '-g', lw=1.0)
@@ -169,7 +169,7 @@ theta = 0.7853981633974483
 
 The wireframe and the atom positions visualized using 
 [Ovito](https://www.ovito.org/) are shown below. On the wireframe, the dark
-line marks the centerline and the red dot indicates the origin.
+line marks the centerline and the blue dot indicates the origin.
 
 <center> <img src="images/helical_ribbon.png" width="300"> </center>
 

@@ -42,7 +42,7 @@ along the centerline (shown as the dark curve).
 :::{figure-md} fig-target
 :class: myclass
 
-<img src="schem1.png" width="600">
+<img src="fig-schem_ribbon.png" width="600">
 
 Schematic of the ribbon midplane in the reference configuration (left) and the
 current configuration (right). The red, green, and blue arrows indicate the
