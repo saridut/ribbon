@@ -172,7 +172,7 @@ the atom positions visualized using [Ovito](https://www.ovito.org/) are shown
 in the middle panel. On the wireframe, the dark line marks the centerline and
 the blue dot indicates the origin. 
 
-<p style="text-align: center">
+<p align="center">
 <img src="images/helical_ribbon.png" width="400">
 </p>
 
