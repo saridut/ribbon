@@ -160,18 +160,28 @@ plt.show()
 Executing the above code gives
 
 ```bash
-R = 1.2499999999999998
-P = 7.853981633974481
-kg = 0.0
-km = 0.4
-theta = 0.7853981633974483
+R = 2
+P = 10
+kg = 6.93889e-18
+km = 0.25
+theta = 0.672159
 ```
 
-The wireframe and the atom positions visualized using 
-[Ovito](https://www.ovito.org/) are shown below. On the wireframe, the dark
-line marks the centerline and the blue dot indicates the origin.
+In the image below, the left panel shows the wireframe of the midsurface and
+the atom positions visualized using [Ovito](https://www.ovito.org/) are shown
+in the middle panel. On the wireframe, the dark line marks the centerline and
+the blue dot indicates the origin. 
 
-<center> <img src="images/helical_ribbon.png" width="300"> </center>
+<p style="text-align: center">
+<img src="images/helical_ribbon.png" width="400">
+</p>
+
+The atoms can also be chosen based on the crystal structure. In this case, the
+positions need to be generated using a crystallographic tool or manually. The
+right panel of the above image shows a 3.5 monolayer CdSe nanoribbon with the
+same code as before except that the Cd and Se atom positions in the reference
+state were obtained from [ASE](https://ase-lib.org). The visualization was
+performed using [ChimeraX](https://www.rbvi.ucsf.edu/chimerax).
 
 ### A double Archimedean spiral
 
