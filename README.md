@@ -173,7 +173,7 @@ in the middle panel. On the wireframe, the dark line marks the centerline and
 the blue dot indicates the origin. 
 
 <p align="center">
-<img src="images/helical_ribbon.png" width="400">
+<img src="images/helical_ribbon.png" width="500">
 </p>
 
 The atoms can also be chosen based on the crystal structure. In this case, the
@@ -219,4 +219,4 @@ write_xyz(X, Y, Z, atom_symbol='C', filename='dspl.xyz', title='')
 
 Below is the double spiral ribbon visualized in Ovito.
 
-<center> <img src="images/double_spiral.png" width="400"> </center>
+<p align="center"> <img src="images/double_spiral.png" width="500"> </p>
