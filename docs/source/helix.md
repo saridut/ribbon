@@ -73,7 +73,11 @@ length of the helix.
 
 **Extent** of the helix along its axis $h = NP = PL/\sqrt{4\pi^2R^2+P^2}$.
 
-**Distance** along the axis $\delta = w/\tan \psi = 2 \pi R w/P$.
+**Distance** along the axis $\delta = w/\cos \psi 
+= w \sqrt{P^2+4\pi^2 R^2}/2\pi R$.
+
+**Condition for non-intersection**. $P \geq \delta 
+\implies P \geq 2\pi R w /\sqrt{4\pi^2 R^2 - w^2}$.
 
 _Relations between radius/pitch and curvature/twist_.
 
@@ -84,7 +88,7 @@ l = \frac{4\pi^2 R}{4\pi^2 R^2 + P^2} \quad \mathrm{and}
 \end{gather}
 
 **Perpendicularity**. If two helices on a cylinder are at right angles, $\tan
-\psi_1 \tan \psi_2 = -1 \implies P_1P_2 = -1 \implies m_1m_2 = -1$.
+\psi_1 \tan \psi_2 = -1 \implies P_2 = -4\pi^2 R_1 R_2/P_1 = -4\pi^2 R^2/P_1$.
 
 **Helix axis from quaternion integration**. 
 \begin{equation}

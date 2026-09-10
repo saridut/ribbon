@@ -15,17 +15,22 @@ except:
 
 import matplotlib.pyplot as plt
 
-
-length = 36 #2*np.pi
-width = 4.0
+length = 30 #2*np.pi
+width = 8.2
 thickness = 0.0
-#l = 0.5
-#l = lambda x: 0.5 *(1-x/length)
-#l = lambda x: 0.2 *(x**0.4)
-#m = 0.5 #lambda x: 0.5 #*(1-x/length) #+ve right handed, -ve left handed
-#n = 0.4 #lambda x: 0.5*np.cos(x) #0.5
-#n = lambda x: 0.5*(1-x/length)
     
+radius = 2.0
+pitch = 9.5
+#pitch = 1*math.sqrt(math.pi*radius*width)
+
+#pitch = 2*math.pi*radius*width/math.sqrt(4*math.pi**2*radius**2-width**2)
+
+#delta = width*math.sqrt(pitch**2+4*math.pi**2*radius**2)/(2*math.pi*radius)
+#print(f"delta = {delta}")
+#tan_psi = pitch/(2*math.pi*radius)
+#psi = math.atan(tan_psi)
+#print(f"psi = {math.degrees(psi)}")
+
 #Atoms reference position
 #atom_coords = []
 #for x in np.arange(0, length, 0.4):
@@ -34,14 +39,16 @@ thickness = 0.0
 
 ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.0)
 #ribbon.set_atom_refpos(np.asarray(atom_coords))
-ribbon.set_shape('HelicalRibbon', radius=1.5, pitch=10)
+ribbon.set_shape('HelicalRibbon', radius=radius, pitch=pitch)
 #ribbon.set_shape('Helicoid', pitch=16)
 #ribbon.set_shape('Cylinder', radius=2)
-#ribbon.set_shape('Torus', Radius=10 , radius=1)
+#ribbon.set_shape('Torus', Radius=20 , radius=2.0)
 #ribbon.set_shape('Plane')
-#ribbon.set_shape('General', radius=2.5, pitch=10,
-#                   profile='Circle', profile_params={'radius': 20.0})
-#ribbon.set_shape('General', radius=1.2, pitch=6, profile='Line')
+#l, m = ribbon._rp2lm(radius, pitch)
+#n = m**2/l
+#ribbon.set_shape('General', radius=radius, pitch=pitch,
+#                   profile='Circle', profile_params={'radius': -4.0})
+#ribbon.set_shape('General', radius=radius, pitch=pitch, profile='Line')
 #ribbon.set_shape('General', radius=1, pitch=6,
 #                 profile='Helix', profile_params={'radius': 1.0, 'pitch': -6})
 #Catenary
@@ -67,21 +74,22 @@ ribbon.create(orient_along=[1,0,0])
 #        print(f"{x:g}  {y:g}") 
 #else:
 #    print(f"R = {out}")
-print(f"R = {ribbon.get_radius()}\n"
-      f"P = {ribbon.get_pitch()}\n"
-      f"kg = {ribbon.get_gauss_curvature()}\n"
-      f"km = {ribbon.get_mean_curvature()}\n"
-      f"theta = {ribbon.get_theta()}")
+print(f"R = {ribbon.get_radius():.4g}\n"
+      f"P = {ribbon.get_pitch():.4g}\n"
+      f"kg = {ribbon.get_gauss_curvature():.4g}\n"
+      f"km = {ribbon.get_mean_curvature():.4g}\n"
+      f"theta = {ribbon.get_theta():.4g}")
 
 #write_xyz(ribbon.atom_pos[:,0], ribbon.atom_pos[:,1], ribbon.atom_pos[:,2]) 
 
 #raise SystemExit()
 figh, axh = plt.subplots(nrows=1, ncols=1, figsize=(12,9),
-                subplot_kw={'projection':'3d', 'proj_type': 'persp'}
+                subplot_kw={'projection':'3d', 'proj_type': 'ortho'}
                 )
 
 axh.plot(ribbon.mline[:,0], ribbon.mline[:,1], ribbon.mline[:,2], '-k', lw=1.2)
 axh.plot(ribbon.mline[0,0], ribbon.mline[0,1], ribbon.mline[0,2], 'ob')
+
 #axh.plot_surface(ribbon.msurf[:,:,0], ribbon.msurf[:,:,1],
 #            ribbon.msurf[:,:,2], facecolor='r', edgecolor='0.6', lw=0.7, alpha=0.4,
 #            rstride=4, cstride=8)

@@ -252,10 +252,18 @@ class Ribbon(object):
             pitch = kwargs['pitch']
             if not isinstance(pitch, RealNumber) or pitch == 0.0:
                 raise ValueError(f"`pitch`(= {pitch}) must be a non-zero float.")
+            delta = 2*np.pi*radius*self.width/math.sqrt(4*np.pi**2*radius**2
+                                                        -self.width**2)
+            if pitch < delta:
+                raise ValueError("The ribbon will self overlap. Try reducing"
+                                 " width, or increasin pitch, or increasing"
+                                 " radius.")
             l, m = self._rp2lm(radius, pitch)
             self.lm = (l, m)
             self.n = m**2/l
-            self._profile_curve = {'type': 'Helix', 'lm': (l, -m)}
+            #l,m for the profile curve
+            l, m = self._rp2lm(radius, -4*math.pi**2*radius**2/pitch)
+            self._profile_curve = {'type': 'Helix', 'lm': (l, m)}
         elif shape == 'Helicoid':
             pitch = kwargs['pitch']
             if not isinstance(pitch, RealNumber) or pitch == 0.0:
@@ -563,6 +571,15 @@ class Ribbon(object):
             vline_axis = np.zeros((3,), dtype=np.float64)
             self.create_helix(self.v, 'lm', (lm,), vline_axis,  vline)
             vline = rotlib.align(vline, vline_axis, mline_axis )
+            #vline_angle = math.acos(vline_axis[0])
+            #mline_angle = math.acos(mline_axis[0])
+            #rotate_by = vline_angle - (math.pi/2 + mline_angle)
+            #print(f"angv = {math.degrees(vline_angle)}")
+            #print(f"angm = {math.degrees(mline_angle)}")
+            #print(f"angr = {math.degrees(rotate_by)}")
+            #vline = rotlib.aa_rotate_vectors(vline, np.array([0.0, 1.0, 0.0]),
+            #                         -rotate_by)
+            #print('angle = ', np.degrees(np.acos(np.dot(vline_axis, mline_axis))) )
         elif self._profile_curve['type'] == 'General':
             vline_coords = [self._profile_curve['f'](x) for x in self.v]
             if len(vline_coords[0]) == 2:
