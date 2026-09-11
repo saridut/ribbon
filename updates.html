@@ -1,0 +1,751 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Updates &#8212; ribbon 0.5.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=ceb86668" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="_static/documentation_options.js?v=1dd76d02"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script>window.MathJax = {"loader": {"load": ["[tex]/upgreek"]}, "tex": {"packages": {"[+]": ["upgreek"]}, "macros": {"bs": ["\\boldsymbol{#1}", 1], "bm": ["\\mathbf{#1}", 1], "omag": ["\\lVert \\boldsymbol{\\upomega} \\rVert", 0]}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'updates';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Ribbon equations" href="ribbons.html" />
+    <link rel="prev" title="ribbon 0.5.0" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.5.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ribbon 0.5.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Updates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ribbons.html">
+    Ribbon equations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="helix.html">
+    Notes on the helix curve
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="spirals.html">
+    Spiral equations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="modules.html">
+    ribbon
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/saridut/ribbon" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Updates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ribbons.html">
+    Ribbon equations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="helix.html">
+    Notes on the helix curve
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="spirals.html">
+    Spiral equations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="modules.html">
+    ribbon
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/saridut/ribbon" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item"><nav class="sidebar-indices-items" aria-labelledby="pst-indices-navigation-heading-2">
+  <p id="pst-indices-navigation-heading-2" class="sidebar-indices-items__title" role="heading" aria-level="1">Indices</p>
+  <ul class="indices-link">
+        <li class="toctree-l1">
+          <a class="reference internal"
+             href="genindex.html"
+             accesskey="I">General Index</a>
+        </li>
+        <li class="toctree-l1">
+          <a class="reference internal" href="py-modindex.html">Python Module Index</a>
+        </li>
+  </ul>
+</nav></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Updates</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="updates">
+<h1>Updates<a class="headerlink" href="#updates" title="Link to this heading">#</a></h1>
+<section id="issues-with-the-narrow-narrow-ribbon-approximation">
+<h2>Issues with the narrow narrow-ribbon approximation<a class="headerlink" href="#issues-with-the-narrow-narrow-ribbon-approximation" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The configurations for helicoidal ribbons generated by my earlier code was
+based on the narrow-ribbon approximation, as is conventional in almost all
+continuum theories (see, e.g.
+<a class="reference external" href="http://doi.org/10.1103/PhysRevE.98.022502">Grossman et al</a>).
+I refer to narrowness here with respect to the radius of curvature, i.e. the
+width of the ribbon is small compared to the circumference of the cylinder it
+wraps around.</p></li>
+<li><p>This assumption leads to the edges of the ribbon lifting away from the
+cylinder surface when the ribbon’s width becomes comparable to the
+circumference of the cylinder, as is the case in Austin’s manuscript where the
+width is <span class="math notranslate nohighlight">\(\approx 15\)</span> nm and the radius of curvature <span class="math notranslate nohighlight">\(\approx 20\)</span> nm.  Compare
+a narrow vs wide ribbon in panels (a) and (b) in the figure below.  This issue
+is not equivalent to the width being above or below a certain critical width
+(like in our PNAS paper), as we are not solving an elasticity problem; rather
+we are geometrically generating conformations given the curvatures along the
+centerline.</p></li>
+<li><p><strong>Solution</strong>. The
+<a class="reference external" href="https://saridut.github.io/ribbon/ribbon.html#ribbon.Ribbon">Ribbon</a> class
+has been reimplemented to handle wide as well as narrow ribbons. This has been
+done by changing the implementation to that of a <em>translation surface</em>. These
+are surfaces generated by translating one curve over another. In case of a
+helicoid, the surface is generated by first creating the centerline in the form
+of a helix and then translating another helix with opposite handedness at right
+angles to the centerline helix. Each translation is also accompanied by a
+corresponding rotation in the Darboux frame. While conceptually simple, the
+implementation <em>took me a lot of effort</em> as visualizing angles between helices
+is hard, especially with Matplotlib in 3D.</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/fig-ts.png"><img alt="_images/fig-ts.png" class="align-center" src="_images/fig-ts.png" style="width: 500px;" />
+</a>
+<ul class="simple">
+<li><p><strong>Additional advantages</strong>.</p>
+<ul>
+<li><p>Thankfully, the reimplementation as a translation surface allows us to
+access configurations of NPLs below critical width, where the Gauss
+curvature is still non-zero. These have been observed in MD simulations when
+increasing with as one transitions from helicoid to a helical ribbon.</p></li>
+<li><p>The current implementation also allows surface generation by translating
+an arbitrary curve along the centerline. This includes spirals, conical
+helices (reducing radius of curvature along the centerline), etc.</p></li>
+<li><p>A condition for self-overlap detection at a given radius and pitch of a
+helical ribbon has also been added.</p></li>
+</ul>
+</li>
+<li><p><strong>GitHub</strong> Please take a look at the
+<a class="reference external" href="https://github.com/saridut/ribbon">GitHub repo</a> if you are interested.</p></li>
+</ul>
+</section>
+<section id="saxs-form-factor-from-hamley">
+<h2>SAXS form factor from Hamley<a class="headerlink" href="#saxs-form-factor-from-hamley" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><em>Why train a network when an analytical solution is available?</em> Let’s compare
+the accuracy of the analytical form factors for helical ribbons.</p></li>
+<li><p>Ian Hamley has two papers on the form factor of helical ribbons. The key
+results of first paper is contained within the second.</p>
+<ol class="arabic simple">
+<li><p>I. W. Hamley,
+<a class="reference external" href="http://doi.org/10.1021/ma8014917">Form factor of helical ribbons</a>
+<em>Macromolecules</em> 41, 8948 (2008).</p></li>
+<li><p>I. W. Hamley, V. Castelletto,
+<a class="reference external" href="http://doi.org/10.1107/S1600576725004637">Small-angle scattering studies on diverse peptide-based nanotube and helical
+ribbon structures reveal distinct form and structure
+factors</a>
+<em>Journal of Appl Crystallography</em> 58, 1311(2025).</p></li>
+</ol>
+</li>
+<li><p>In his 2025 paper, the form factor has an approximate expression (see eq 20)
+and a non-approximate one (see eq 19).</p></li>
+<li><p>There is an <strong>error</strong> in the expression for <span class="math notranslate nohighlight">\(\delta\)</span> (see Fig. 9). It should
+be <span class="math notranslate nohighlight">\(\delta = w/\cos \psi\)</span> instead of <span class="math notranslate nohighlight">\(\delta = w/\tan \psi\)</span>. Fig. 9 is in
+fact adapted from <a class="reference external" href="http://doi.org/10.1073/pnas.90.23.11341">Chung et al
+(1993)</a>, where the expression is in
+fact correct. Nevertheless, it <em>wasted a lot of my time</em> to realise that there
+is an error and to rederive the expression and ponder over its implications. I
+do not know if the error carries over to the results in Hamley’s papers.</p></li>
+<li><p>The non-approximate result in eq 19 is in fact a triple integral <em>performed
+numerically</em>. I found it exceedingly slow to be of any practical use. The
+triple integral evaluation involves nested calls to the adaptive QUADPACK
+routines (which are already in Fortran). Even though it could be sped up using
+Fortran or C (I did it in Python), it is very unlikely to be fast enough. In my
+tests, each value to <span class="math notranslate nohighlight">\(q\)</span> requires more than 3000 function evaluations! Having
+wasted sufficient amount of time, I abandoned this approach.</p></li>
+<li><p>The approximate result in eq 20 is better, but still slow. Moreover, it
+appears not to directly involve the length of the NPL. Furthermore, there is
+a dependence on the number of terms in the infinite summation. Based on the
+approximation that only the intensities at the layer lines count, I have used
+<span class="math notranslate nohighlight">\(n = pq_{\mathrm{max}}/\pi\)</span>. The figure below shows results for varying pitch
+and radius at a fixed width of 15 nm.</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/hamley_rad.png"><img alt="_images/hamley_rad.png" class="align-center" src="_images/hamley_rad.png" style="width: 1000px;" />
+</a>
+<a class="reference internal image-reference" href="_images/hamley_pitch.png"><img alt="_images/hamley_pitch.png" class="align-center" src="_images/hamley_pitch.png" style="width: 1000px;" />
+</a>
+<ul class="simple">
+<li><p><em>Do you think these curves look reasonable?</em> Let’s compare with debyer.</p></li>
+</ul>
+</section>
+<section id="saxs-form-factor-from-debyer">
+<h2>SAXS form factor from <em>debyer</em><a class="headerlink" href="#saxs-form-factor-from-debyer" title="Link to this heading">#</a></h2>
+<p>Typical NPL dimensions as per Austin’s manuscipt: “The nanoplatelets have
+average lateral dimensions of 65.5 ± 11.4 nm by 13.9 ± 5.3 nm, as measured by
+TEM …”. I am assuming that the length referred to is the length of the helix
+(as can be measured with a ruler from an image) and not its contour length,
+otherwise, the NPL is too small. In this case, we need the contour length –
+this is the length of the flat NPL that gets deformed to a helical ribbon,
+likewise for the width. <em>We always work with the dimensions of the reference
+object, never with the current configuration</em>.  If the helix length is <span class="math notranslate nohighlight">\(L_H\)</span>,
+the contour length is <span class="math notranslate nohighlight">\(L = (L_H - \delta)\sqrt{4\pi^2 R^2 + P^2}/P\)</span>, where <span class="math notranslate nohighlight">\(R\)</span>
+is the radius of the helix, <span class="math notranslate nohighlight">\(P\)</span> is its pitch, and <span class="math notranslate nohighlight">\(\delta\)</span> is the width of the
+ribbon <em>along</em> the axis.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For CdSe NPLs, the Ribbon class automatically orients the crystal [110]
+direction along the lines of the principal curvatures, consistent with the
+given radius and pitch.</p>
+</div>
+<p>Below are results from Debyer for 3ML CdSe NPLs at <span class="math notranslate nohighlight">\(L_H = 64\)</span>nm and <span class="math notranslate nohighlight">\(w = 15\)</span>nm.
+Visually comparing with the TEM images in the literature, I do think that the
+width needs to be larger as it seems there is significant wraparound. Of
+course, simple visual inspection is error-prone.</p>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="_images/dbr-rad.png"><img alt="_images/dbr-rad.png" src="_images/dbr-rad.png" style="width: 1000px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Effect of changing radius at constant pitch. Do note that since <span class="math notranslate nohighlight">\(L_H\)</span> is
+constant, <span class="math notranslate nohighlight">\(L\)</span> is changing for each case. The realtively poor quality snapshots
+are from Ovito, the better looking ones are from ChimeraX.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="_images/dbr-pitch.png"><img alt="_images/dbr-pitch.png" src="_images/dbr-pitch.png" style="width: 1000px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Effect of changing pitch at constant radius.</span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<div class="important admonition">
+<p class="admonition-title">Hamley vs debyer</p>
+<p>I think there are qualitative similarities between Hamley’s results and direct
+calculation from debyer, but the differences are significant enough to conclude that
+the form factor equations are insufficient.</p>
+</div>
+</section>
+<section id="coarse-graining">
+<h2>Coarse graining<a class="headerlink" href="#coarse-graining" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Nevertheless, even debyer is slow when it comes to generating 100 000 form
+factors from XYZ files! Typical number of atoms for 3ML CdSe in each XYZ file
+is 150 000.</p></li>
+<li><p>Since the Ribbon class has an underlying mesh, is it okay to replace a unit
+cell (incluing the width) to a single point in the center? For a 3ML CdSe
+NPL, this reduces 7 layers to a single layer. In this case, if we are bothered
+by the <span class="math notranslate nohighlight">\(f_i\)</span> atomic scattering factors for SAXS, do we simply sum up the <span class="math notranslate nohighlight">\(f_i\)</span>s
+of the unit cell? On the other hand, can we just use the bulk scattering factor
+for CdSe?</p></li>
+</ul>
+</section>
+<section id="polydisperse-supensions-with-hoomd">
+<h2>Polydisperse supensions with HOOMD<a class="headerlink" href="#polydisperse-supensions-with-hoomd" title="Link to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is required only for structure factor.</p>
+</div>
+<ul class="simple">
+<li><p><strong>How to handle polydispersity?</strong> Given the <em>very low</em> volume fraction of
+NPLs, we cannot even simulate two NPLs of experimental dimensions using MD.</p></li>
+<li><p>But we can use <a class="reference external" href="https://hoomd-blue.readthedocs.io/en/v7.1.2/">HOOMD-blue</a>
+for hard particle Monte Carlo. Here is the workflow:</p>
+<ol class="arabic simple">
+<li><p>Treat NPLs as hard particles. No interactions as of now, but can be
+put in later as simple Lennard-Jones type between the centers of the NPLs.</p></li>
+<li><p>The Ribbon mesh is by definition a union of convex polyhedra. So NPLs are
+represented as mesh objects.</p></li>
+<li><p>HOOMD performs hard particle Monte Carlo to generate non-overlapping
+configurations at a certain volume fraction.</p></li>
+<li><p>Use debyer on the <em>mesh to central unit cell atom</em> representation to
+calculate the overall intensity.</p></li>
+</ol>
+</li>
+</ul>
+</section>
+<section id="configurations-for-training-neural-networks">
+<h2>Configurations for training neural networks<a class="headerlink" href="#configurations-for-training-neural-networks" title="Link to this heading">#</a></h2>
+<p>Moving forward, I need to know the ranges for each of the following variables
+to generate, say around 100 000 configurations of single 3ML CdSe NPLs. We will
+assume a uniform distribution for each of the vaiables.</p>
+<div class="important admonition">
+<p class="admonition-title">Requirements</p>
+<p>I need the ranges of the following quantities.</p>
+</div>
+<ul class="simple">
+<li><p>Length of the NPL in flat reference state. The length of the helix will
+also work.</p></li>
+<li><p>Width of the NPL in flat reference state.</p></li>
+<li><p>Radius of the helical ribbon formed by rolling from the flat reference
+configuration.</p></li>
+<li><p>Pitch</p></li>
+<li><p>Whether the configurations include helicoids and flat configurations. In
+experiments, is it typically the case that all NPLs are helical ribbons, or
+some are helicoids?</p></li>
+<li><p>Q values. I am assuming 0.01 to 1 nm<span class="math notranslate nohighlight">\(^{-1}\)</span> will be sufficient.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">ribbon 0.5.0</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ribbons.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Ribbon equations</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#issues-with-the-narrow-narrow-ribbon-approximation">Issues with the narrow narrow-ribbon approximation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#saxs-form-factor-from-hamley">SAXS form factor from Hamley</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#saxs-form-factor-from-debyer">SAXS form factor from <em>debyer</em></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#coarse-graining">Coarse graining</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#polydisperse-supensions-with-hoomd">Polydisperse supensions with HOOMD</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configurations-for-training-neural-networks">Configurations for training neural networks</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/updates.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Sarit Dutta.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.20.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
