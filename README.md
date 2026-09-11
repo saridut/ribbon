@@ -173,7 +173,7 @@ in the middle panel. On the wireframe, the dark line marks the centerline and
 the blue dot indicates the origin. 
 
 <p align="center">
-<img src="fig-ts.png" width="500">
+<img src="images/helical_ribbon.png" width="500">
 </p>
 
 The atoms can also be chosen based on the crystal structure. In this case, the
