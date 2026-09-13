@@ -19,7 +19,7 @@ length = 30 #2*np.pi
 width = 8.2
 thickness = 0.0
     
-radius = 2.0
+radius = 4.0
 pitch = 9.5
 #pitch = 1*math.sqrt(math.pi*radius*width)
 
@@ -40,7 +40,7 @@ pitch = 9.5
 ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.0)
 #ribbon.set_atom_refpos(np.asarray(atom_coords))
 ribbon.set_shape('HelicalRibbon', radius=radius, pitch=pitch)
-#ribbon.set_shape('Helicoid', pitch=16)
+#ribbon.set_shape('Helicoid', pitch=pitch)
 #ribbon.set_shape('Cylinder', radius=2)
 #ribbon.set_shape('Torus', Radius=20 , radius=2.0)
 #ribbon.set_shape('Plane')

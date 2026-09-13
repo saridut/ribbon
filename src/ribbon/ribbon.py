@@ -252,8 +252,10 @@ class Ribbon(object):
             pitch = kwargs['pitch']
             if not isinstance(pitch, RealNumber) or pitch == 0.0:
                 raise ValueError(f"`pitch`(= {pitch}) must be a non-zero float.")
-            delta = 2*np.pi*radius*self.width/math.sqrt(4*np.pi**2*radius**2
-                                                        -self.width**2)
+            #delta = 2*np.pi*radius*self.width/math.sqrt(4*np.pi**2*radius**2
+            #                                            -self.width**2)
+            psi = math.atan2(pitch, (2*np.pi*radius))
+            delta = self.width/math.cos(psi)
             if pitch < delta:
                 raise ValueError("The ribbon will self overlap. Try reducing"
                                  " width, or increasin pitch, or increasing"
