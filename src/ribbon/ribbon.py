@@ -258,9 +258,11 @@ class Ribbon(object):
             #Trig version
             psi = math.atan2(pitch, (2*np.pi*radius))
             delta = self.width/math.cos(psi)
-            if pitch < delta:
-                raise ValueError("The ribbon will self overlap. Try reducing"
-                                 " width, or increasin pitch, or increasing"
+            nturns = self.length/math.sqrt(4*np.pi**2*radius**2+pitch**2)
+            if (nturns>1) and (abs(pitch) < abs(delta)):
+                raise ValueError("The ribbon will self overlap. Pitch ="
+                                f" {pitch}, delta = {delta}. Try reducing"
+                                 " width, or increasing pitch, or increasing"
                                  " radius.")
             l, m = self._rp2lm(radius, pitch)
             self.lm = (l, m)

@@ -20,10 +20,10 @@ width = 8.2
 thickness = 0.0
     
 radius = 4.0
-pitch = 9.5
+pitch = -9.5
 #pitch = 1*math.sqrt(math.pi*radius*width)
 
-#pitch = 2*math.pi*radius*width/math.sqrt(4*math.pi**2*radius**2-width**2)
+pitch = -2*math.pi*radius*width/math.sqrt(4*math.pi**2*radius**2-width**2)
 
 #delta = width*math.sqrt(pitch**2+4*math.pi**2*radius**2)/(2*math.pi*radius)
 #print(f"delta = {delta}")
