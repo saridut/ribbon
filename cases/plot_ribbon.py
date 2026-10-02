@@ -15,21 +15,12 @@ except:
 
 import matplotlib.pyplot as plt
 
-length = 30 #2*np.pi
-width = 8.2
-thickness = 0.0
+length = 20.0
+width = 5.0
+thickness = 2.0
     
-radius = 4.0
-pitch = -9.5
-#pitch = 1*math.sqrt(math.pi*radius*width)
-
-pitch = -2*math.pi*radius*width/math.sqrt(4*math.pi**2*radius**2-width**2)
-
-#delta = width*math.sqrt(pitch**2+4*math.pi**2*radius**2)/(2*math.pi*radius)
-#print(f"delta = {delta}")
-#tan_psi = pitch/(2*math.pi*radius)
-#psi = math.atan(tan_psi)
-#print(f"psi = {math.degrees(psi)}")
+radius = 10.0
+pitch = 50
 
 #Atoms reference position
 #atom_coords = []
@@ -37,17 +28,17 @@ pitch = -2*math.pi*radius*width/math.sqrt(4*math.pi**2*radius**2-width**2)
 #    for y in np.arange(-width/2, width/2, 0.4):
 #            atom_coords.append([x,y,0])
 
-ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.0)
+ribbon = Ribbon(length, width, thickness, 0.1, 0.1, 0.1, locns=-0.2)
 #ribbon.set_atom_refpos(np.asarray(atom_coords))
-ribbon.set_shape('HelicalRibbon', radius=radius, pitch=pitch)
-#ribbon.set_shape('Helicoid', pitch=pitch)
-#ribbon.set_shape('Cylinder', radius=2)
+#ribbon.set_shape('HelicalRibbon', radius=radius, pitch=pitch)
+ribbon.set_shape('Helicoid', pitch=pitch)
+#ribbon.set_shape('Cylinder', radius=radius)
 #ribbon.set_shape('Torus', Radius=20 , radius=2.0)
 #ribbon.set_shape('Plane')
 #l, m = ribbon._rp2lm(radius, pitch)
 #n = m**2/l
 #ribbon.set_shape('General', radius=radius, pitch=pitch,
-#                   profile='Circle', profile_params={'radius': -4.0})
+#                   profile='Circle', profile_params={'radius': 10.0})
 #ribbon.set_shape('General', radius=radius, pitch=pitch, profile='Line')
 #ribbon.set_shape('General', radius=1, pitch=6,
 #                 profile='Helix', profile_params={'radius': 1.0, 'pitch': -6})
@@ -66,7 +57,7 @@ ribbon.set_shape('HelicalRibbon', radius=radius, pitch=pitch)
 #                 profile='Circle', profile_params={'radius': -5.0})
 
 #ribbon.create(orient_along=None)
-ribbon.create(orient_along=[1,0,0])
+ribbon.create(orient_along=[0,1,0])
 
 #out = ribbon.get_radius()
 #if isinstance(out, tuple):
@@ -79,7 +70,7 @@ print(f"R = {ribbon.get_radius():.4g}\n"
       f"kg = {ribbon.get_gauss_curvature():.4g}\n"
       f"km = {ribbon.get_mean_curvature():.4g}\n"
       f"theta = {ribbon.get_theta():.4g}")
-
+#print(ribbon.lm, ribbon.n)
 #write_xyz(ribbon.atom_pos[:,0], ribbon.atom_pos[:,1], ribbon.atom_pos[:,2]) 
 
 #raise SystemExit()
@@ -87,33 +78,55 @@ figh, axh = plt.subplots(nrows=1, ncols=1, figsize=(12,9),
                 subplot_kw={'projection':'3d', 'proj_type': 'ortho'}
                 )
 
-axh.plot(ribbon.mline[:,0], ribbon.mline[:,1], ribbon.mline[:,2], '-k', lw=1.2)
-axh.plot(ribbon.mline[0,0], ribbon.mline[0,1], ribbon.mline[0,2], 'ob')
+axh.plot(ribbon.nline[:,0], ribbon.nline[:,1], ribbon.nline[:,2], '-k', lw=1.2)
+axh.plot(ribbon.nline[0,0], ribbon.nline[0,1], ribbon.nline[0,2], 'ob')
 
-#axh.plot_surface(ribbon.msurf[:,:,0], ribbon.msurf[:,:,1],
-#            ribbon.msurf[:,:,2], facecolor='r', edgecolor='0.6', lw=0.7, alpha=0.4,
+#axh.plot_surface(ribbon.nsurf[:,:,0], ribbon.nsurf[:,:,1],
+#            ribbon.nsurf[:,:,2], facecolor='r', edgecolor='0.6', lw=0.7, alpha=0.4,
 #            rstride=4, cstride=8)
 
-axh.plot(ribbon.msurf[0,:,0], ribbon.msurf[0,:,1], ribbon.msurf[0,:,2], '-g', lw=1.0)
-axh.plot(ribbon.msurf[-1,:,0], ribbon.msurf[-1,:,1], ribbon.msurf[-1,:,2], '-g', lw=1.0)
-axh.plot(ribbon.msurf[:,0,0], ribbon.msurf[:,0,1], ribbon.msurf[:,0,2], '-r', lw=1.0)
-axh.plot(ribbon.msurf[:,-1,0], ribbon.msurf[:,-1,1], ribbon.msurf[:,-1,2], '-r', lw=1.0)
+axh.plot(ribbon.nsurf[0,:,0], ribbon.nsurf[0,:,1], ribbon.nsurf[0,:,2], '-g', lw=1.0)
+axh.plot(ribbon.nsurf[-1,:,0], ribbon.nsurf[-1,:,1], ribbon.nsurf[-1,:,2], '-g', lw=1.0)
+axh.plot(ribbon.nsurf[:,0,0], ribbon.nsurf[:,0,1], ribbon.nsurf[:,0,2], '-r', lw=1.0)
+axh.plot(ribbon.nsurf[:,-1,0], ribbon.nsurf[:,-1,1], ribbon.nsurf[:,-1,2], '-r', lw=1.0)
 
-j = -1
-axh.plot_wireframe(ribbon.msurf[:j,:,0], ribbon.msurf[:j,:,1],
-            ribbon.msurf[:j,:,2], linestyles='-', linewidths=0.5,
-            rstride=2, cstride=8, color='0.7')
+#Plot the grid
+axh.plot_wireframe(ribbon.grid[:,:,0,0], ribbon.grid[:,:,0,1],
+            ribbon.grid[:,:,0,2], linestyles='-', linewidths=0.5,
+            rstride=8, cstride=8, color='0.3')
+axh.plot_wireframe(ribbon.grid[:,:,-1,0], ribbon.grid[:,:,-1,1],
+            ribbon.grid[:,:,-1,2], linestyles='-', linewidths=0.5,
+            rstride=8, cstride=8, color='0.7')
 
-frl = np.linspace(0, ribbon.u.size-1, 10, dtype=np.int32)
-axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
-           ribbon._d1[frl,0], ribbon._d1[frl,1], ribbon._d1[frl,2],
-           length=1.0, color='r')
-axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
-           ribbon._d2[frl,0], ribbon._d2[frl,1], ribbon._d2[frl,2],
-           length=1.0, color='g')
-axh.quiver(ribbon.mline[frl,0], ribbon.mline[frl,1], ribbon.mline[frl,2],
-           ribbon._d3[frl,0], ribbon._d3[frl,1], ribbon._d3[frl,2],
-           length=1.0, color='b')
+axh.plot_wireframe(ribbon.grid[:,0,:,0], ribbon.grid[:,0,:,1],
+            ribbon.grid[:,0,:,2], linestyles='-', linewidths=0.5,
+            rstride=8, cstride=8, color='0.3')
+axh.plot_wireframe(ribbon.grid[:,-1,:,0], ribbon.grid[:,-1,:,1],
+            ribbon.grid[:,-1,:,2], linestyles='-', linewidths=0.5,
+            rstride=8, cstride=8, color='0.7')
+
+axh.plot_wireframe(ribbon.grid[0,:,:,0], ribbon.grid[0,:,:,1],
+            ribbon.grid[0,:,:,2], linestyles='-', linewidths=0.5,
+            rstride=8, cstride=8, color='0.3')
+axh.plot_wireframe(ribbon.grid[-1,:,:,0], ribbon.grid[-1,:,:,1],
+            ribbon.grid[-1,:,:,2], linestyles='-', linewidths=0.5,
+            rstride=8, cstride=8, color='0.7')
+
+#j = -1
+#axh.plot_wireframe(ribbon.nsurf[:j,:,0], ribbon.nsurf[:j,:,1],
+#            ribbon.nsurf[:j,:,2], linestyles='-', linewidths=0.5,
+#            rstride=8, cstride=8, color='0.7')
+
+#frl = np.linspace(0, ribbon.u.size-1, 10, dtype=np.int32)
+#axh.quiver(ribbon.nline[frl,0], ribbon.nline[frl,1], ribbon.nline[frl,2],
+#           ribbon._d1[frl,0], ribbon._d1[frl,1], ribbon._d1[frl,2],
+#           length=1.0, color='r')
+#axh.quiver(ribbon.nline[frl,0], ribbon.nline[frl,1], ribbon.nline[frl,2],
+#           ribbon._d2[frl,0], ribbon._d2[frl,1], ribbon._d2[frl,2],
+#           length=1.0, color='g')
+#axh.quiver(ribbon.nline[frl,0], ribbon.nline[frl,1], ribbon.nline[frl,2],
+#           ribbon._d3[frl,0], ribbon._d3[frl,1], ribbon._d3[frl,2],
+#           length=1.0, color='b')
 
 axh.set_aspect('equal', 'box')
 #axh.set_xlabel('x')
