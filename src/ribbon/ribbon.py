@@ -189,26 +189,38 @@ class Ribbon(object):
             Whether to make a copy of the input array `atom_refpos`.
         atom_pos : (n,3) ndarray
             External buffer for :attr:`.atom_pos`. If `None`, an array will be
-            created.
+            created. Must have the same shape as `atom_refpos`.
 
         Returns
         -------
         None
 
         """
+        #Check if atom_refpos and atom_pos have the same shape
+        if atom_pos is not None:
+            if atom_refpos.shape != atom_pos.shape:
+                raise ValueError(f"atom_pos shape = {atom_pos.shape} must be"
+                                 f" same as that of self.atom_refpos ="
+                                 f" {self.atom_refpos.shape}."
+                                )
         self.atom_refpos = np.asarray(atom_refpos, dtype=np.float64, copy=copy)
-        if self.atom_refpos.shape == self.atom_pos.shape:
+        if atom_pos is not None:
+            self.atom_pos = atom_pos
             self.atom_pos[...] = 0.0
+        else:
+            if self.atom_refpos.shape == self.atom_pos.shape:
+                #Reuse existing buffer
+                self.atom_pos[...] = 0.0
+            else:
+                #Create new buffer
+                self.atom_pos = np.zeros_like(self.atom_refpos)
+        #Check if other internal buffers need to be zeroed out or created
+        if self.atom_pos.shape == self._ap_ns.shape:
             self._ap_ns[...] = 0.0
             self._ap_du[...] = 0.0
             self._ap_dv[...] = 0.0
             self._ap_normals[...] = 0.0
         else:
-            if atom_pos is None:
-                self.atom_pos = np.zeros_like(self.atom_refpos)
-            else:
-                self.atom_pos = atom_pos
-                self.atom_pos[...] = 0.0
             self._ap_ns = np.zeros_like(self.atom_pos)
             self._ap_du = np.zeros_like(self.atom_pos)
             self._ap_dv = np.zeros_like(self.atom_pos)
