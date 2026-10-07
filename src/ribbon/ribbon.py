@@ -31,12 +31,12 @@ class Ribbon(object):
     u, v, w : 1d ndarray
         Coordinates of the reference grid along length, width, and thickness
         directions, respectively.
-    mline : (n,3) ndarray
-        Coordinates of the grid points on the ribbon midline in current
+    nline : (n,3) ndarray
+        Coordinates of the grid points on the ribbon neutral line in current
         configuration.
-    msurf : (m,n,3) ndarray
-        Coordinates of the grid points on the ribbon midsurface in the current
-        configuration.
+    nsurf : (m,n,3) ndarray
+        Coordinates of the grid points on the ribbon neutral surface in the
+        current configuration.
     grid : (m,n,p,3) ndarray
         Coordinates of the grid points of the ribbon in the current configuration.
     atom_refpos : (n,3) ndarray
@@ -72,10 +72,15 @@ class Ribbon(object):
     ngpt : int | None, optional
         Number of grid points in the thickness direction. Must be > 2. Used
         only if `thickness != 0` and `gspt = None`.
+    locns : float, optional
+        Fractional distance of the neutral surface from the midsurface. Must be
+        <= 0.5 and >= -0.5. A negative (positive) value indicates that the
+        neutral surface is below (above) the midsurface. If `thickness`=0,
+        `locns` is ignored.
 
     """
     def __init__(self, length, width, thickness, gspl, gspw, gspt,
-                 ngpl=None, ngpw=None, ngpt=None):
+                 ngpl=None, ngpw=None, ngpt=None, locns=0.0):
         if not ( isinstance(length, RealNumber) and length > 0 ):
             raise ValueError( f"`length`(= {length:g}) must be an instance of"
                 " numbers.Real or numpy.number and must be > 0.")
@@ -138,25 +143,33 @@ class Ribbon(object):
             self.w = np.linspace(-self.thickness/2, self.thickness/2, n,
                                  dtype=np.float64)
 
+        if self.thickness > 0:
+            if locns < -0.5 or locns > 0.5:
+                raise ValueError(f"locns (={locns}) must be >=-0.5 and <=0.5.") 
+            else:
+                self._locns = locns*self.thickness
+        else:
+            self._locns = 0.0
+
         self._profile_curve = {'name': '', 'params': {}}
-        self.mline = np.zeros((self.u.size, 3))
-        self._d1 = np.zeros_like(self.mline)
-        self._d2 = np.zeros_like(self.mline)
-        self._d3 = np.zeros_like(self.mline)
-        self.msurf = np.zeros((self.u.size, self.v.size, 3))
+        self.nline = np.zeros((self.u.size, 3))
+        self._d1 = np.zeros_like(self.nline)
+        self._d2 = np.zeros_like(self.nline)
+        self._d3 = np.zeros_like(self.nline)
+        self.nsurf = np.zeros((self.u.size, self.v.size, 3))
         if self.thickness > 0:
             self.grid = np.zeros((self.u.size, self.v.size, self.w.size, 3))
-            self._msurf_du = np.zeros_like(self.msurf)
-            self._msurf_dv = np.zeros_like(self.msurf)
-            self._normals = np.zeros_like(self.msurf)
+            self._nsurf_du = np.zeros_like(self.nsurf)
+            self._nsurf_dv = np.zeros_like(self.nsurf)
+            self._normals = np.zeros_like(self.nsurf)
         else:
-            self.grid = np.zeros_like(self.msurf)
-            self._msurf_du = np.zeros((0,0))
-            self._msurf_dv = np.zeros_like(self._msurf_du)
-            self._normals = np.zeros_like(self._msurf_du)
+            self.grid = np.zeros_like(self.nsurf)
+            self._nsurf_du = np.zeros((0,0))
+            self._nsurf_dv = np.zeros_like(self._nsurf_du)
+            self._normals = np.zeros_like(self._nsurf_du)
         self.atom_refpos = np.zeros((0,0))
         self.atom_pos = np.zeros_like(self.atom_refpos)
-        self._ap_ms = np.zeros_like(self.atom_pos)
+        self._ap_ns = np.zeros_like(self.atom_pos)
         self._ap_du = np.zeros_like(self.atom_pos)
         self._ap_dv = np.zeros_like(self.atom_pos)
         self._ap_normals = np.zeros_like(self.atom_pos)
@@ -186,7 +199,7 @@ class Ribbon(object):
         self.atom_refpos = np.asarray(atom_refpos, dtype=np.float64, copy=copy)
         if self.atom_refpos.shape == self.atom_pos.shape:
             self.atom_pos[...] = 0.0
-            self._ap_ms[...] = 0.0
+            self._ap_ns[...] = 0.0
             self._ap_du[...] = 0.0
             self._ap_dv[...] = 0.0
             self._ap_normals[...] = 0.0
@@ -196,7 +209,7 @@ class Ribbon(object):
             else:
                 self.atom_pos = atom_pos
                 self.atom_pos[...] = 0.0
-            self._ap_ms = np.zeros_like(self.atom_pos)
+            self._ap_ns = np.zeros_like(self.atom_pos)
             self._ap_du = np.zeros_like(self.atom_pos)
             self._ap_dv = np.zeros_like(self.atom_pos)
             self._ap_normals = np.zeros_like(self.atom_pos)
@@ -350,17 +363,17 @@ class Ribbon(object):
                 raise ValueError(f"`profile`(= {ptype}) must be one of 'Line'"
                                  " 'Circle', 'Helix', or 'General'.")
         #Zero-out arrays to allow calling this method repeatedly
-        self.mline[...] = 0.0
+        self.nline[...] = 0.0
         self._d1[...] = 0.0
         self._d2[...] = 0.0
         self._d3[...] = 0.0
-        self.msurf[...] = 0.0
+        self.nsurf[...] = 0.0
         self.grid[...] = 0.0
-        self._msurf_du[...] = 0.0
-        self._msurf_dv[...] = 0.0
+        self._nsurf_du[...] = 0.0
+        self._nsurf_dv[...] = 0.0
         self._normals[...] = 0.0
         self.atom_pos[...] = 0.0
-        self._ap_ms[...] = 0.0
+        self._ap_ns[...] = 0.0
         self._ap_du[...] = 0.0
         self._ap_dv[...] = 0.0
         self._ap_normals[...] = 0.0
@@ -492,16 +505,16 @@ class Ribbon(object):
     def translate_to_center(self):
         """
         Translates grids and current atom positions so as to bring the center
-        of the ribbon midline at (0,0,0).
+        of the ribbon neutral line at (0,0,0).
 
         Returns
         -------
         None
 
         """
-        center = self.mline.mean(axis=0)
-        self.mline -= center
-        self.msurf -= center
+        center = self.nline.mean(axis=0)
+        self.nline -= center
+        self.nsurf -= center
         self.grid -= center
         self.atom_pos -= center
 
@@ -530,36 +543,36 @@ class Ribbon(object):
                 raise ValueError(f"orient_along = {orient_along} is a zero vector.")
             else:
                 axis = np.asarray(orient_along[0:3], dtype=np.float64)/mag
-        self._create_msurf(axis)
+        self._create_nsurf(axis)
         self._interpolate()
 
 
-    def _create_msurf(self, axis):
+    def _create_nsurf(self, axis):
         """
-        Creates the mid-surface.
+        Creates the neutral surface.
         """
-        #Create the midline
-        mline_axis = np.zeros((3,), dtype=np.float64)
+        #Create the neutral line
+        nline_axis = np.zeros((3,), dtype=np.float64)
         if not callable(self.lm):
             if self.lm[0]==self.lm[1]==0.0:
-                self.mline[...] = 0.0
+                self.nline[...] = 0.0
                 self._d1[...] = 0.0
                 self._d2[...] = 0.0
                 self._d3[...] = 0.0
-                self.mline[:,2] = self.u
+                self.nline[:,2] = self.u
                 self._d1[:,0] = 1.0
                 self._d2[:,1] = 1.0
                 self._d3[:,2] = 1.0
-                mline_axis[2] = 1.0
+                nline_axis[2] = 1.0
             else:
-                self.create_helix(self.u, 'lm', (self.lm,), mline_axis,
-                                  self.mline, d1=self._d1, d2=self._d2,
+                self.create_helix(self.u, 'lm', (self.lm,), nline_axis,
+                                  self.nline, d1=self._d1, d2=self._d2,
                                   d3=self._d3)
         else:
-            self.create_helix_var(self.u, 'lm', (self.lm,), mline_axis,
-                                   self.mline, d1=self._d1, d2=self._d2,
+            self.create_helix_var(self.u, 'lm', (self.lm,), nline_axis,
+                                   self.nline, d1=self._d1, d2=self._d2,
                                    d3=self._d3)
-        #Create the midsurface
+        #Create the neutral surface
         vline = np.zeros((self.v.size,3), dtype=np.float64)
         #2-D profile curve lies on the x-y plane. It is y = f(x), where x
         #spans the d1 direction, and -y the d2 direction. Needs better
@@ -578,74 +591,74 @@ class Ribbon(object):
             self.create_helix(self.v, 'lm', (lm,), vline_axis,  vline)
             vline = rotlib.align(vline, vline_axis, mline_axis )
             #vline_angle = math.acos(vline_axis[0])
-            #mline_angle = math.acos(mline_axis[0])
-            #rotate_by = vline_angle - (math.pi/2 + mline_angle)
+            #nline_angle = math.acos(nline_axis[0])
+            #rotate_by = vline_angle - (math.pi/2 + nline_angle)
             #print(f"angv = {math.degrees(vline_angle)}")
-            #print(f"angm = {math.degrees(mline_angle)}")
+            #print(f"angm = {math.degrees(nline_angle)}")
             #print(f"angr = {math.degrees(rotate_by)}")
             #vline = rotlib.aa_rotate_vectors(vline, np.array([0.0, 1.0, 0.0]),
             #                         -rotate_by)
-            #print('angle = ', np.degrees(np.acos(np.dot(vline_axis, mline_axis))) )
+            #print('angle = ', np.degrees(np.acos(np.dot(vline_axis, nline_axis))) )
         elif self._profile_curve['type'] == 'General':
             vline_coords = [self._profile_curve['f'](x) for x in self.v]
             if len(vline_coords[0]) == 2:
                 vline[:,:2] = np.asarray(vline_coords, dtype=np.float64)
             elif len(vline_coords[0]) == 3:
                 vline[:,:] = np.asarray(vline_coords, dtype=np.float64)
-        # Move the profile curve to midline frames to create the surface
+        # Move the profile curve to neutral line frames to create the surface
         dcm = np.zeros((3,3))
         for i in range(self.u.size):
             dcm[0,:] = self._d1[i,:]
             dcm[1,:] = self._d2[i,:]
             dcm[2,:] = self._d3[i,:]
             vline_shifted = rotlib.dcm_rotate_vectors(vline, dcm )
-            self.msurf[i,:,:] = vline_shifted + self.mline[i,:]
+            self.nsurf[i,:,:] = vline_shifted + self.nline[i,:]
 
         if axis is not None:
-            self.mline = rotlib.align(self.mline, mline_axis, axis )
-            self._d1 = rotlib.align(self._d1, mline_axis, axis)
-            self._d2 = rotlib.align(self._d2, mline_axis, axis)
-            self._d3 = rotlib.align(self._d3, mline_axis, axis)
-            self.msurf = rotlib.align(self.msurf, mline_axis, axis )
-        #End of create midsurface
+            self.nline = rotlib.align(self.nline, nline_axis, axis )
+            self._d1 = rotlib.align(self._d1, nline_axis, axis)
+            self._d2 = rotlib.align(self._d2, nline_axis, axis)
+            self._d3 = rotlib.align(self._d3, nline_axis, axis)
+            self.nsurf = rotlib.align(self.nsurf, nline_axis, axis )
+        #End of create neutral surface
 
 
     def _interpolate(self):
-        rbsX = RectBivariateSpline(self.u, self.v, self.msurf[:,:,0])
-        rbsY = RectBivariateSpline(self.u, self.v, self.msurf[:,:,1])
-        rbsZ = RectBivariateSpline(self.u, self.v, self.msurf[:,:,2])
+        rbsX = RectBivariateSpline(self.u, self.v, self.nsurf[:,:,0])
+        rbsY = RectBivariateSpline(self.u, self.v, self.nsurf[:,:,1])
+        rbsZ = RectBivariateSpline(self.u, self.v, self.nsurf[:,:,2])
 
         #Calculate the current grid
         if self.thickness == 0:
-            self.grid[...] = self.msurf[...]
+            self.grid[...] = self.nsurf[...]
         else:
-            self._msurf_du[:,:,0] = rbsX(self.u, self.v, dx=1, dy=0, grid=True)
-            self._msurf_du[:,:,1] = rbsY(self.u, self.v, dx=1, dy=0, grid=True)
-            self._msurf_du[:,:,2] = rbsZ(self.u, self.v, dx=1, dy=0, grid=True)
+            self._nsurf_du[:,:,0] = rbsX(self.u, self.v, dx=1, dy=0, grid=True)
+            self._nsurf_du[:,:,1] = rbsY(self.u, self.v, dx=1, dy=0, grid=True)
+            self._nsurf_du[:,:,2] = rbsZ(self.u, self.v, dx=1, dy=0, grid=True)
 
-            self._msurf_dv[:,:,0] = rbsX(self.u, self.v, dx=0, dy=1, grid=True)
-            self._msurf_dv[:,:,1] = rbsY(self.u, self.v, dx=0, dy=1, grid=True)
-            self._msurf_dv[:,:,2] = rbsZ(self.u, self.v, dx=0, dy=1, grid=True)
+            self._nsurf_dv[:,:,0] = rbsX(self.u, self.v, dx=0, dy=1, grid=True)
+            self._nsurf_dv[:,:,1] = rbsY(self.u, self.v, dx=0, dy=1, grid=True)
+            self._nsurf_dv[:,:,2] = rbsZ(self.u, self.v, dx=0, dy=1, grid=True)
 
-            self._normals[:,:,:] = np.cross(self._msurf_du, self._msurf_dv, axis=2)
+            self._normals[:,:,:] = np.cross(self._nsurf_du, self._nsurf_dv, axis=2)
             norm = np.linalg.vector_norm(self._normals, axis=2, keepdims=True)
             self._normals /= norm
 
             for k in range(self.w.size):
-                w = self.w[k]
-                self.grid[:,:,k,:] = self.msurf + w*self._normals
+                w = self.w[k] - self._locns
+                self.grid[:,:,k,:] = self.nsurf + w*self._normals
 
         #Atom positions
         if self.atom_refpos.shape[0] > 0:
-            self._ap_ms[:,0] = rbsX(self.atom_refpos[:,0], 
+            self._ap_ns[:,0] = rbsX(self.atom_refpos[:,0], 
                                     self.atom_refpos[:,1], grid=False)
-            self._ap_ms[:,1] = rbsY(self.atom_refpos[:,0], 
+            self._ap_ns[:,1] = rbsY(self.atom_refpos[:,0], 
                                     self.atom_refpos[:,1], grid=False)
-            self._ap_ms[:,2] = rbsZ(self.atom_refpos[:,0], 
+            self._ap_ns[:,2] = rbsZ(self.atom_refpos[:,0], 
                                     self.atom_refpos[:,1], grid=False)
 
             if self.thickness == 0:
-                self.atom_pos[:,:] = self._ap_ms[:,:]
+                self.atom_pos[:,:] = self._ap_ns[:,:]
             else:
                 self._ap_du[:,0] = rbsX(self.atom_refpos[:,0],
                                         self.atom_refpos[:,1], dx=1, dy=0,
@@ -670,8 +683,9 @@ class Ribbon(object):
                 self._ap_normals[:,:] = np.cross(self._ap_du, self._ap_dv, axis=1)
                 norm = np.linalg.vector_norm(self._ap_normals, axis=1, keepdims=True)
                 self._ap_normals /= norm
-                tmp = np.einsum('ij,i->ij',self._ap_normals, self.atom_refpos[:,2])
-                self.atom_pos[:,:] = self._ap_ms + tmp
+                atom_refw_wrt_ns = self.atom_refpos[:,2] - self._locns
+                tmp = np.einsum('ij,i->ij',self._ap_normals, atom_refw_wrt_ns)
+                self.atom_pos[:,:] = self._ap_ns + tmp
 
 
     @staticmethod
