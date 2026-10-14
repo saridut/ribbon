@@ -324,15 +324,15 @@ class Ribbon(object):
             self.n = 0.0
             self._profile_curve = {'type': 'Line'}
         elif shape == 'General':
-            mline_radius = kwargs['radius']
-            if not callable(mline_radius) and \
-                    not isinstance(mline_radius, RealNumber):
-                raise ValueError(f"`radius`(= {mline_radius}) must be a float.")
-            mline_pitch = kwargs['pitch']
-            if not callable(mline_pitch) and \
-                    not isinstance(mline_pitch, RealNumber):
-                raise ValueError(f"`pitch`(= {mline_pitch}) must be a float.")
-            self.lm = self._rp2lm(mline_radius, mline_pitch)
+            nline_radius = kwargs['radius']
+            if not callable(nline_radius) and \
+                    not isinstance(nline_radius, RealNumber):
+                raise ValueError(f"`radius`(= {nline_radius}) must be a float.")
+            nline_pitch = kwargs['pitch']
+            if not callable(nline_pitch) and \
+                    not isinstance(nline_pitch, RealNumber):
+                raise ValueError(f"`pitch`(= {nline_pitch}) must be a float.")
+            self.lm = self._rp2lm(nline_radius, nline_pitch)
             ptype = kwargs['profile']
             ppar = kwargs.get('profile_params', None)
             if ptype == 'Line':
@@ -355,11 +355,11 @@ class Ribbon(object):
                 if not isinstance(pitch, RealNumber) or pitch == 0.0:
                     raise ValueError(f"Profile parameter `pitch`(= {pitch})"
                                       " must be a non-zero float.")
-                if math.copysign(1.0, pitch)*math.copysign(1.0, mline_pitch) > 0:
+                if math.copysign(1.0, pitch)*math.copysign(1.0, nline_pitch) > 0:
                     raise ValueError(
                             f"Profile parameter `pitch`(= {pitch})"
                             f" and the shape parameter `pitch`(="
-                            f" {mline_pitch}) must have opposite signs. Else,"
+                            f" {nline_pitch}) must have opposite signs. Else,"
                             f" the distortion is too large to be physically"
                             f" meaningful for nanoplatelets."
                             )
@@ -601,7 +601,7 @@ class Ribbon(object):
             lm = self._profile_curve['lm']
             vline_axis = np.zeros((3,), dtype=np.float64)
             self.create_helix(self.v, 'lm', (lm,), vline_axis,  vline)
-            vline = rotlib.align(vline, vline_axis, mline_axis )
+            vline = rotlib.align(vline, vline_axis, nline_axis )
             #vline_angle = math.acos(vline_axis[0])
             #nline_angle = math.acos(nline_axis[0])
             #rotate_by = vline_angle - (math.pi/2 + nline_angle)
@@ -795,9 +795,9 @@ class Ribbon(object):
         #Alternative formulation for omega[0] = -l
         #TODO: check for sign consistency. Ideally, omega[0]=l,
         #omega[2] = m. Check if this may be the case.
-        #self.mline[i,0] = omega[0]*omega[2]*iomega_mag2*(u - sn*iomega_mag)
-        #self.mline[i,1] = omega[0]*iomega_mag2*(1 - cs)
-        #self.mline[i,2] = omega[2]*omega[2]*iomega_mag2 \
+        #self.nline[i,0] = omega[0]*omega[2]*iomega_mag2*(u - sn*iomega_mag)
+        #self.nline[i,1] = omega[0]*iomega_mag2*(1 - cs)
+        #self.nline[i,2] = omega[2]*omega[2]*iomega_mag2 \
         #        *(u - sn*iomega_mag) + sn*iomega_mag
 
         #self._d1[i,0] = omega[0]*omega[0]*iomega_mag2*(1-cs) + cs
